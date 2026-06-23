@@ -13,6 +13,7 @@ func _ready() -> void:
 	_spawn_player()
 	_setup_hud()
 	_setup_build_menu()
+	WaveManager.wave_ended.connect(_on_wave_ended)
 
 func _setup_sky() -> void:
 	var we = $WorldEnvironment
@@ -181,14 +182,44 @@ func _spawn_player() -> void:
 func _spawn_swarm_patrol() -> void:
 	var count = 4 + randi() % 3
 	for i in range(count):
-		var s = load("res://scripts/systems/swarm_unit.gd").new()
-		var angle = randf() * TAU
-		var dist = 100.0 + randf() * 80.0
-		s.global_position = Vector3(380 + cos(angle) * dist, (randf() - 0.5) * 30.0, sin(angle) * dist)
-		s.speed = 8.0 + randf() * 6.0
-		add_child(s)
-		WaveManager.on_enemy_spawned()
-		s.killed.connect(_on_swarm_killed)
+		_spawn_swarm_unit(100.0 + randf() * 80.0, 8.0 + randf() * 6.0)
+
+func _spawn_swarm_unit(dist: float, spd: float) -> void:
+	var s = load("res://scripts/systems/swarm_unit.gd").new()
+	var angle = randf() * TAU
+	s.global_position = Vector3(380 + cos(angle) * dist, (randf() - 0.5) * 30.0, sin(angle) * dist)
+	s.speed = spd
+	add_child(s)
+	WaveManager.on_enemy_spawned()
+	s.killed.connect(_on_swarm_killed)
 
 func _on_swarm_killed(_unit: Node) -> void:
 	WaveManager.on_enemy_killed()
+	if WaveManager.enemies_alive <= 0 and not WaveManager.wave_active and WaveManager.wave_number == 0:
+		_on_patrol_cleared()
+
+func _start_next_wave() -> void:
+	if WaveManager.wave_active:
+		return
+	WaveManager.start_next_wave()
+	var config = WaveManager.get_wave_config()
+	var count = config.get("count", 5)
+	var spawn_interval = config.get("spawn_interval", 1.5)
+	_spawn_wave_units(count, spawn_interval)
+
+func _spawn_wave_units(count: int, interval: float) -> void:
+	for i in range(count):
+		var dist = 150.0 + randf() * 100.0
+		var spd = 10.0 + float(WaveManager.wave_number) * 2.0
+		_spawn_swarm_unit(dist, spd)
+		if i < count - 1:
+			await get_tree().create_timer(interval).timeout
+
+func _on_patrol_cleared() -> void:
+	await get_tree().create_timer(3.0).timeout
+	_start_next_wave()
+
+func _on_wave_ended(_wave: int) -> void:
+	if WaveManager.wave_number < WaveManager.waves_before_victory:
+		await get_tree().create_timer(5.0).timeout
+		_start_next_wave()

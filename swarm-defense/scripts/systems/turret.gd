@@ -88,6 +88,9 @@ func get_fire_point() -> Vector3:
 func _process(delta: float) -> void:
 	if not is_placed:
 		return
+	var bm = get_tree().current_scene.find_child("Buildings", true, false)
+	if bm and bm.has_method("has_power_for") and not bm.has_power_for("Turret"):
+		return
 	_cooldown = max(_cooldown - delta, 0.0)
 	_find_target()
 	if _target:

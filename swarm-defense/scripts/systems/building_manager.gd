@@ -4,10 +4,23 @@ var _buildings: Array[Building] = []
 
 signal building_placed(building: Building)
 signal building_destroyed(building: Building)
+signal power_changed(generation: float, consumption: float, stored: float, storage_max: float)
 
 var _ghost: Building = null
 var _build_mode: bool = false
 var _pending_scene: PackedScene = null
+
+var total_generation: float = 0.0
+var total_consumption: float = 0.0
+var battery_stored: float = 0.0
+var battery_capacity: float = 0.0
+var power_surplus: float = 0.0
+
+func _ready() -> void:
+	set_process(true)
+
+func _process(delta: float) -> void:
+	_recalculate_power(delta)
 
 func place_building(scene: PackedScene, position: Vector3, rotation_y: float) -> Building:
 	var building = scene.instantiate() as Building
@@ -32,6 +45,64 @@ func remove_building(building: Building) -> void:
 		_buildings.erase(building)
 		building_destroyed.emit(building)
 		building.queue_free()
+
+func _recalculate_power(delta: float) -> void:
+	var gen = 0.0
+	var con = 0.0
+	var bat_stored = 0.0
+	var bat_cap = 0.0
+
+	for b in _buildings:
+		if not b.is_placed or b.is_queued_for_deletion():
+			continue
+		if b.power_generation > 0:
+			gen += b.power_generation
+		if b.power_consumption > 0:
+			con += b.power_consumption
+		if b is Battery:
+			bat_stored += b.stored_power
+			bat_cap += b.power_storage
+
+	var net = gen - con
+
+	if net > 0 and bat_cap > 0:
+		for b in _buildings:
+			if b is Battery and not b.is_queued_for_deletion():
+				net = b.store_power(net)
+				if net <= 0:
+					break
+
+	if net < 0 and bat_stored > 0:
+		for b in _buildings:
+			if b is Battery and not b.is_queued_for_deletion() and b.stored_power > 0:
+				var drawn = b.draw_power(-net)
+				net += drawn
+				if net >= 0:
+					break
+
+	total_generation = gen
+	total_consumption = con
+	battery_stored = bat_stored
+	battery_capacity = bat_cap
+	power_surplus = net
+
+func has_power_for(building_type: String) -> bool:
+	if building_type == "SolarPanel" or building_type == "Battery":
+		return true
+	if total_generation >= total_consumption:
+		return true
+	if battery_stored > 0:
+		return true
+	return false
+
+func get_power_status() -> Dictionary:
+	return {
+		"generation": total_generation,
+		"consumption": total_consumption,
+		"stored": battery_stored,
+		"capacity": battery_capacity,
+		"surplus": power_surplus,
+	}
 
 func enter_build_mode(scene: PackedScene) -> void:
 	if _build_mode:
