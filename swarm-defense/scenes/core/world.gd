@@ -2,7 +2,7 @@ extends Node3D
 
 @onready var celestial_system: Node3D = $CelestialSystem
 @onready var camera_manager: Camera3D = $CameraManager
-@onready var building_manager: BuildingManager = $Buildings
+@onready var building_manager = $Buildings
 
 func _ready() -> void:
 	GameManager.change_phase(GameManager.GamePhase.PLAYING)

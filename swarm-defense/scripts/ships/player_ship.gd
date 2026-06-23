@@ -24,7 +24,7 @@ var _mining_active: bool = false
 var _mining_hit: Vector3 = Vector3.ZERO
 var _build_mode: bool = false
 var _build_menu: BuildMenu = null
-var _building_manager: BuildingManager = null
+var _building_manager = null
 
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var spring_arm: SpringArm3D = $CameraPivot/SpringArm3D
@@ -41,7 +41,7 @@ func _ready() -> void:
 	add_to_group("player_ship")
 	_setup_thrusters()
 	mining_beam.visible = false
-	_building_manager = get_tree().current_scene.find_child("Buildings", true, false) as BuildingManager
+	_building_manager = get_tree().current_scene.find_child("Buildings", true, false)
 	_build_menu = get_tree().current_scene.find_child("BuildMenu", true, false) as BuildMenu
 	if _build_menu:
 		_build_menu.building_selected.connect(_on_building_selected)

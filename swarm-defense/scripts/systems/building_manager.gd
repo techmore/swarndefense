@@ -1,4 +1,3 @@
-class_name BuildingManager
 extends Node
 
 var _buildings: Array[Building] = []
