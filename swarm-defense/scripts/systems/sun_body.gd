@@ -64,7 +64,6 @@ func _setup_corona() -> void:
     particle_mat.scale_min = 0.5
     particle_mat.scale_max = 2.0
     particle_mat.color = Color(1.0, 0.8, 0.3, 0.4)
-    particle_mat.hue_variation = 0.1
 
     _corona_particles.process_material = particle_mat
     _corona_particles.emitting = true
