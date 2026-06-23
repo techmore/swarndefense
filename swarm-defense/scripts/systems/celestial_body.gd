@@ -84,12 +84,12 @@ func _setup_atmosphere() -> void:
 
     _atmosphere_instance.mesh = atmo_sphere
     _atmosphere_instance.material_override = atmo_mat
-    _atmosphere_instance.cast_shadow = false
+    _atmosphere_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
     add_child(_atmosphere_instance)
 
 func _setup_orbit_trail() -> void:
     _orbit_trail = MeshInstance3D.new()
-    _orbit_trail.cast_shadow = false
+    _orbit_trail.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
     add_child(_orbit_trail)
     _rebuild_orbit_trail()
 

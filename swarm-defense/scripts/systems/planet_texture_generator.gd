@@ -1,4 +1,5 @@
-extends Node
+class_name PlanetTextureGenerator
+extends RefCounted
 
 enum PlanetType { MERCURY, VENUS, EARTH, MARS, MOON, GAS_GIANT, ICE_WORLD, LAVA_WORLD }
 
