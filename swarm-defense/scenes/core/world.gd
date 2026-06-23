@@ -181,7 +181,7 @@ func _spawn_player() -> void:
 func _spawn_swarm_patrol() -> void:
 	var count = 4 + randi() % 3
 	for i in range(count):
-		var s = SwarmUnit.new()
+		var s = load("res://scripts/systems/swarm_unit.gd").new()
 		var angle = randf() * TAU
 		var dist = 100.0 + randf() * 80.0
 		s.global_position = Vector3(380 + cos(angle) * dist, (randf() - 0.5) * 30.0, sin(angle) * dist)

@@ -1,4 +1,3 @@
-class_name SwarmUnit
 extends Node3D
 
 var team: int = 1

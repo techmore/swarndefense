@@ -217,10 +217,10 @@ func _update_mining(delta: float) -> void:
 		_mining_active = false
 		return
 
-	var swarm = collider as SwarmUnit
-	if not swarm and collider.get_parent():
-		swarm = collider.get_parent() as SwarmUnit
-	if swarm:
+	var swarm = collider
+	if swarm and not swarm.is_in_group("swarm") and swarm.get_parent() and swarm.get_parent().is_in_group("swarm"):
+		swarm = swarm.get_parent()
+	if swarm and swarm.is_in_group("swarm"):
 		swarm.take_damage(15.0 * delta * 10.0, self)
 		_mining_active = true
 		_mining_hit = hit

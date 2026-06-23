@@ -5,7 +5,7 @@ uniform float galaxy_brightness: hint_range(0.0, 3.0) = 1.5;
 
 vec3 hash33(vec3 p) {
 	p = fract(p * vec3(443.897, 397.297, 491.187));
-	p += dot(p.zxy, 19.27);
+	p += dot(p.zxy, vec3(19.27));
 	return fract(vec3(p.x * p.y, p.y * p.z, p.z * p.x));
 }
 
