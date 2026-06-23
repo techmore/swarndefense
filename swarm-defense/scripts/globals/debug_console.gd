@@ -1,6 +1,5 @@
-extends Node
-
 @tool
+extends Node
 
 var _history: Array[String] = []
 var _visible: bool = false

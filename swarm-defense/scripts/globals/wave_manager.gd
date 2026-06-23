@@ -8,7 +8,7 @@ signal wave_started(wave: int)
 signal wave_ended(wave: int)
 signal all_waves_complete()
 
-export var waves_before_victory: int = 3
+@export var waves_before_victory: int = 3
 
 func _ready() -> void:
     pass

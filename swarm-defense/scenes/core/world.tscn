@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scenes/core/world.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/systems/camera_manager.gd" id="2"]
-[ext_resource type="PackedScene" uid="uid://dvlj5aohhmp03" path="res://scenes/celestial/sun.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/celestial/sun.tscn" id="3"]
 
 [sub_resource type="Environment" id="1"]
 background_color = Color(0.0, 0.0, 0.02, 1.0)
