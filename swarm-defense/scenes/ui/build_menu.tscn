@@ -1,0 +1,18 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/build_menu.gd" id="1_hhbl3"]
+
+[node name="BuildMenu" type="CanvasLayer"]
+layer = 2
+script = BuildMenu
+
+[node name="Center" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 0
+offset_left = -200.0
+offset_top = -150.0
+offset_right = 200.0
+offset_bottom = 150.0
+size = Vector2(400, 300)
+
+[node name="Options" type="Node" parent="Center"]

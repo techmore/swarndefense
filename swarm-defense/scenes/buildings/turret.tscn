@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://duhxwwodlsq7r"]
+
+[ext_resource type="Script" path="res://scripts/systems/turret.gd" id="1_stqxg"]
+
+[node name="Turret" type="Node3D"]
+script = Turret

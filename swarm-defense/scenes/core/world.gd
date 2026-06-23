@@ -2,6 +2,7 @@ extends Node3D
 
 @onready var celestial_system: Node3D = $CelestialSystem
 @onready var camera_manager: Camera3D = $CameraManager
+@onready var building_manager: BuildingManager = $Buildings
 
 func _ready() -> void:
 	GameManager.change_phase(GameManager.GamePhase.PLAYING)
@@ -10,6 +11,7 @@ func _ready() -> void:
 	_setup_asteroid_field()
 	_spawn_player()
 	_setup_hud()
+	_setup_build_menu()
 
 func _setup_asteroid_field() -> void:
 	var field = AsteroidField.new()
@@ -19,6 +21,10 @@ func _setup_asteroid_field() -> void:
 func _setup_hud() -> void:
 	var hud = preload("res://scenes/ui/ship_hud.tscn").instantiate()
 	add_child(hud)
+
+func _setup_build_menu() -> void:
+	var menu = preload("res://scenes/ui/build_menu.tscn").instantiate()
+	add_child(menu)
 
 func _setup_starfield() -> void:
 	var mm = MultiMesh.new()

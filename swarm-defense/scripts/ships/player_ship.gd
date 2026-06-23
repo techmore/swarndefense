@@ -22,6 +22,9 @@ var _lateral_intensity: float = 0.0
 var _cargo: Dictionary = {"metal": 0, "crystal": 0}
 var _mining_active: bool = false
 var _mining_hit: Vector3 = Vector3.ZERO
+var _build_mode: bool = false
+var _build_menu: BuildMenu = null
+var _building_manager: BuildingManager = null
 
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var spring_arm: SpringArm3D = $CameraPivot/SpringArm3D
@@ -38,6 +41,11 @@ func _ready() -> void:
 	add_to_group("player_ship")
 	_setup_thrusters()
 	mining_beam.visible = false
+	_building_manager = get_tree().current_scene.find_child("Buildings", true, false) as BuildingManager
+	_build_menu = get_tree().current_scene.find_child("BuildMenu", true, false) as BuildMenu
+	if _build_menu:
+		_build_menu.building_selected.connect(_on_building_selected)
+		_build_menu.menu_closed.connect(_on_build_menu_closed)
 
 func _setup_thrusters() -> void:
 	for t in [thruster_main, thruster_left, thruster_right]:
@@ -69,6 +77,26 @@ func _make_flame_gradient() -> Gradient:
 	return g
 
 func _input(event: InputEvent) -> void:
+	if _build_menu and _build_menu.menu_active:
+		return
+
+	if _build_mode:
+		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			_confirm_build()
+			return
+		if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+			_cancel_build()
+			return
+		if event.is_action_pressed("build_menu"):
+			_cancel_build()
+			return
+		return
+
+	if event.is_action_pressed("build_menu"):
+		if _build_menu:
+			_build_menu.show_menu()
+		return
+
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		if not _mouse_captured:
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
@@ -80,12 +108,40 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact"):
 		_deposit_cargo()
 
+func _on_building_selected(building_type: Dictionary) -> void:
+	if not _building_manager:
+		return
+	var scene = load(building_type["scene"]) as PackedScene
+	if not scene:
+		return
+	if _mouse_captured:
+		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+		_mouse_captured = false
+	_build_mode = true
+	_building_manager.enter_build_mode(scene)
+
+func _on_build_menu_closed() -> void:
+	pass
+
+func _confirm_build() -> void:
+	if _building_manager and _building_manager.is_in_build_mode():
+		_building_manager.confirm_placement()
+		_build_mode = false
+
+func _cancel_build() -> void:
+	if _building_manager and _building_manager.is_in_build_mode():
+		_building_manager.exit_build_mode()
+	_build_mode = false
+
 func _physics_process(delta: float) -> void:
 	_handle_input(delta)
 	_apply_movement(delta)
 	_update_mining(delta)
 	_update_thrusters(delta)
 	_update_camera(delta)
+
+	if _build_mode and _building_manager and _building_manager.is_in_build_mode():
+		_update_ghost_preview()
 
 func _handle_input(delta: float) -> void:
 	var input = InputHandler.get_movement_vector()
@@ -94,6 +150,9 @@ func _handle_input(delta: float) -> void:
 	_is_boosting = boost and _boost > 0.0
 	_throttle = -input.z
 	_lateral_intensity = Vector2(input.x, input.y).length()
+
+	if _build_mode:
+		return
 
 	if input.length() > 0.0:
 		var world_input = global_transform.basis * input
@@ -129,6 +188,11 @@ func _apply_movement(delta: float) -> void:
 		_boost = min(_boost + boost_regen * delta, 100.0)
 
 func _update_mining(delta: float) -> void:
+	if _build_mode:
+		mining_beam.visible = false
+		_mining_active = false
+		return
+
 	var firing = Input.is_action_pressed("primary_fire")
 
 	if not firing or not _mouse_captured:
@@ -225,6 +289,17 @@ func _update_camera(delta: float) -> void:
 	if not spring_arm:
 		return
 	spring_arm.spring_length = lerp(spring_arm.spring_length, 12.0 if not _is_boosting else 18.0, delta * 2.0)
+
+func _update_ghost_preview() -> void:
+	if not _building_manager or not get_viewport():
+		return
+	var camera = get_viewport().get_camera_3d()
+	if not camera:
+		return
+	var screen_center = get_viewport().size * 0.5
+	var ray_origin = camera.project_ray_origin(screen_center)
+	var ray_dir = camera.project_ray_normal(screen_center)
+	_building_manager.update_ghost(ray_origin, ray_dir)
 
 func get_ship_velocity() -> Vector3:
 	return _velocity
