@@ -3,3 +3,5 @@ start-prompt.md
 *.log
 *.uid
 .godot/
+Downloaded_quaternius_assests/
+*.zip

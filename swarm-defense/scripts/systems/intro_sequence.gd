@@ -200,7 +200,7 @@ func _setup_objectives() -> void:
 	_obj_tracker = preload("res://scenes/ui/objective_tracker.tscn").instantiate()
 	get_tree().current_scene.add_child(_obj_tracker)
 
-	var objs = [
+	var objs: Array[Dictionary] = [
 		{key = "build_solar", text = "Build a Solar Panel", needed = 1, current = 0},
 		{key = "build_turret", text = "Build a Turret", needed = 1, current = 0},
 		{key = "deposit_metal", text = "Deposit Resources at Base", needed = 50, current = 0},
