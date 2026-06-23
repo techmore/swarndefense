@@ -5,10 +5,10 @@ enum ZoomLevel { SYSTEM, PLANETARY, SURFACE }
 var current_zoom: ZoomLevel = ZoomLevel.SYSTEM
 var _follow_target: Vector3 = Vector3.ZERO
 var _pan_offset: Vector3 = Vector3.ZERO
-var target_position: Vector3 = Vector3.ZERO
-var zoom_distance: float = 1000.0
-var _rotation_h: float = 0.0
-var _rotation_v: float = -1.0
+target_position: Vector3 = Vector3.ZERO
+zoom_distance: float = 1200.0
+_rotation_h: float = 0.0
+_rotation_v: float = -1.42
 
 @export var system_distance: float = 1500.0
 @export var planetary_distance: float = 100.0
@@ -28,6 +28,8 @@ func _ready() -> void:
 		_follow_target = ships[0].global_position
 		target_position = _follow_target
 
+# ── Input ──────────────────────────────────────────────
+
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_RIGHT):
 		_rotation_h -= event.relative.x * rotate_speed
@@ -45,13 +47,7 @@ func _input(event: InputEvent) -> void:
 		_pan_offset = Vector3.ZERO
 		target_position = _follow_target
 
-func _update_zoom_level() -> void:
-	if zoom_distance > system_distance * 0.6:
-		current_zoom = ZoomLevel.SYSTEM
-	elif zoom_distance > planetary_distance * 0.6:
-		current_zoom = ZoomLevel.PLANETARY
-	else:
-		current_zoom = ZoomLevel.SURFACE
+# ── Frame update ────────────────────────────────────────
 
 func _physics_process(delta: float) -> void:
 	_follow_target = _find_ship()
@@ -65,6 +61,8 @@ func _physics_process(delta: float) -> void:
 	var desired_pos = target_position + offset
 	global_position = global_position.lerp(desired_pos, delta * follow_smoothing)
 	look_at(target_position)
+
+# ── Pan handling ────────────────────────────────────────
 
 func _handle_pan(delta: float) -> void:
 	var mouse_captured = Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED
@@ -103,11 +101,15 @@ func _handle_pan(delta: float) -> void:
 			_pan_offset = Vector3.ZERO
 		target_position = _follow_target + _pan_offset
 
+# ── Ship tracking ────────────────────────────────────────
+
 func _find_ship() -> Vector3:
 	var ships = get_tree().get_nodes_in_group("player_ship")
 	if ships.size() > 0:
 		return ships[0].global_position
 	return _follow_target
+
+# ── Public helpers ──────────────────────────────────────
 
 func center_on_ship() -> void:
 	_pan_offset = Vector3.ZERO
@@ -116,6 +118,38 @@ func center_on_ship() -> void:
 func follow_target(new_target: Vector3) -> void:
 	_follow_target = new_target
 	target_position = _follow_target + _pan_offset
+
+## Snap camera to a true perpendicular (top-down) view of the orbital plane.
+func set_perpendicular() -> void:
+	_rotation_v = -PI / 2.0 + 0.15  # nearly straight down, slight tilt for depth
+	_rotation_h = 0.0
+
+## Smoothly tween zoom_distance and follow target over time.
+func smooth_zoom_to(distance: float, target: Vector3, duration: float = 2.0) -> void:
+	var tw = create_tween()
+	tw.set_parallel(true)
+	tw.tween_method(_set_zoom_distance, zoom_distance, distance, duration).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	_follow_target = target
+	tw.tween_property(self, "target_position", target, duration).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	tw.chain().callback(_update_zoom_level)
+
+## Smoothly pan follow target without changing zoom.
+func smooth_follow_to(target: Vector3, duration: float = 1.5) -> void:
+	_follow_target = target
+	var tw = create_tween()
+	tw.tween_property(self, "target_position", target, duration).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+
+func _set_zoom_distance(val: float) -> void:
+	zoom_distance = val
+	_update_zoom_level()
+
+func _update_zoom_level() -> void:
+	if zoom_distance > system_distance * 0.6:
+		current_zoom = ZoomLevel.SYSTEM
+	elif zoom_distance > planetary_distance * 0.6:
+		current_zoom = ZoomLevel.PLANETARY
+	else:
+		current_zoom = ZoomLevel.SURFACE
 
 func focus_on_planet(planet_position: Vector3, zoom: ZoomLevel = ZoomLevel.PLANETARY) -> void:
 	_follow_target = planet_position

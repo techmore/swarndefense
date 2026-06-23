@@ -6,6 +6,7 @@ var _overlay = null
 var _obj_tracker = null
 var _ship = null
 var _launchpad = null
+var _cam: Camera3D = null
 
 func begin(world: Node3D, ship: Node3D) -> void:
 	_ship = ship
@@ -16,13 +17,21 @@ func begin(world: Node3D, ship: Node3D) -> void:
 	_ship.global_position = _launchpad.global_position + Vector3.UP * 6.0
 
 	_set_ship_locked(true)
-	_zoom_camera_for_intro()
+	_cam = get_viewport().get_camera_3d()
 
 	_run_sequence()
 
 func _run_sequence() -> void:
+	# Ensure perpendicular view at system scale
+	if _cam and _cam.has_method("set_perpendicular"):
+		_cam.set_perpendicular()
+
+	# Phase 1: text over the full solar system view
 	await _overlay.play_intro()
-	await _wait(0.5)
+
+	# Phase 2: zoom toward Earth while swarm approaches
+	_zoom_to_earth(2.5)
+	await _wait(1.0)
 
 	_spawn_scripted_swarm()
 	await _overlay.play_swarm_engaged()
@@ -37,10 +46,37 @@ func _run_sequence() -> void:
 	_set_ship_locked(false)
 	await _overlay.play_outro()
 
+	# Lock camera to ship before launch
+	if _cam and _cam.has_method("center_on_ship"):
+		_follow_ship()
+
 	_animate_ship_launch()
 	await _wait(2.0)
 	_cleanup()
 	intro_finished.emit()
+
+# ── Camera helpers ───────────────────────────────────────
+
+func _zoom_to_earth(duration: float) -> void:
+	if not _cam:
+		return
+	var earth_pos = _find_earth_position()
+	var look_pos = earth_pos + Vector3(0, 15, 0)
+	if _cam.has_method("smooth_zoom_to"):
+		_cam.smooth_zoom_to(80.0, look_pos, duration)
+	elif _cam.has_method("follow_target"):
+		_cam.follow_target(look_pos)
+		_cam.set("zoom_distance", 80.0)
+
+func _follow_ship() -> void:
+	if not _cam or not is_instance_valid(_ship):
+		return
+	if _cam.has_method("smooth_follow_to"):
+		_cam.smooth_follow_to(_ship.global_position, 1.0)
+	elif _cam.has_method("follow_target"):
+		_cam.follow_target(_ship.global_position)
+
+# ── Launchpad ───────────────────────────────────────────
 
 func _spawn_launchpad(world: Node3D) -> void:
 	_launchpad = Node3D.new()
@@ -91,20 +127,19 @@ func _find_earth_position() -> Vector3:
 		return earth.global_position
 	return Vector3(400, 0, 0)
 
+# ── Ship control ────────────────────────────────────────
+
 func _set_ship_locked(locked: bool) -> void:
 	if _ship and _ship.has_method("set_intro_locked"):
 		_ship.set_intro_locked(locked)
 
-func _zoom_camera_for_intro() -> void:
-	var cam = get_viewport().get_camera_3d()
-	if cam and cam.has_method("follow_target"):
-		var earth_pos = _find_earth_position()
-		var look_pos = earth_pos + Vector3(0, 15, 0)
-		cam.follow_target(look_pos)
-		cam.set("zoom_distance", 40.0)
-		cam.set("current_zoom", 2)
-		if cam.has_method("center_on_ship"):
-			cam.center_on_ship()
+func _animate_ship_launch() -> void:
+	if not is_instance_valid(_ship):
+		return
+	if _ship.has_method("apply_launch_impulse"):
+		_ship.apply_launch_impulse()
+
+# ── Scripted swarm ──────────────────────────────────────
 
 func _spawn_scripted_swarm() -> void:
 	var player_pos = _ship.global_position if _ship else Vector3.ZERO
@@ -166,6 +201,8 @@ func _spawn_explosion(pos: Vector3) -> void:
 	if is_instance_valid(flash):
 		flash.queue_free()
 
+# ── Objectives ──────────────────────────────────────────
+
 func _setup_objectives() -> void:
 	_obj_tracker = preload("res://scenes/ui/objective_tracker.tscn").instantiate()
 	get_tree().current_scene.add_child(_obj_tracker)
@@ -194,14 +231,11 @@ func _on_resource_deposited(rtype: String, amount: int) -> void:
 	if rtype == "metal" and _obj_tracker:
 		_obj_tracker.update_objective("deposit_metal", amount)
 
-func _animate_ship_launch() -> void:
-	if not is_instance_valid(_ship):
-		return
-	if _ship.has_method("apply_launch_impulse"):
-		_ship.apply_launch_impulse()
+# ── Cleanup ──────────────────────────────────────────────
 
 func _cleanup() -> void:
-	_overlay.queue_free()
+	if _overlay and is_instance_valid(_overlay):
+		_overlay.queue_free()
 	if is_instance_valid(_launchpad):
 		_launchpad.queue_free()
 

@@ -179,10 +179,9 @@ func _spawn_player() -> void:
 	var ship = preload("res://scenes/ships/player_ship.tscn").instantiate() as Node3D
 	ship.global_position = Vector3(412, 0, 0)
 	$PlayerShips.add_child(ship)
+	# Camera framing is handled by the intro sequence — don't force zoom here.
 	if camera_manager and camera_manager.has_method("follow_target"):
 		camera_manager.follow_target(ship.global_position)
-		camera_manager.zoom_distance = 70.0
-		camera_manager._update_zoom_level()
 	_start_intro(ship)
 
 func _start_intro(ship: Node3D) -> void:
