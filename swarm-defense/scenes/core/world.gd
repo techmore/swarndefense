@@ -4,15 +4,15 @@ extends Node3D
 @onready var camera_manager: Camera3D = $CameraManager
 
 func _ready() -> void:
-    GameManager.change_phase(GameManager.GamePhase.PLAYING)
-    _setup_starfield()
-    _setup_celestial_bodies()
-    _spawn_player()
-    _setup_hud()
+	GameManager.change_phase(GameManager.GamePhase.PLAYING)
+	_setup_starfield()
+	_setup_celestial_bodies()
+	_spawn_player()
+	_setup_hud()
 
 func _setup_hud() -> void:
-    var hud = preload("res://scenes/ui/ship_hud.tscn").instantiate()
-    add_child(hud)
+	var hud = preload("res://scenes/ui/ship_hud.tscn").instantiate()
+	add_child(hud)
 
 func _setup_starfield() -> void:
 	var mm = MultiMesh.new()
