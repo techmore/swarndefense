@@ -26,6 +26,7 @@ func _setup_sky() -> void:
 		sky.sky_material = mat
 		we.environment.sky = sky
 		we.environment.sky_custom_fov = 120.0
+		we.environment.background_mode = Environment.BG_SKY
 
 func _setup_asteroid_field() -> void:
 	var field = AsteroidField.new()
@@ -51,7 +52,7 @@ func _setup_starfield() -> void:
 	mm.mesh.radial_segments = 4
 
 	var mat = StandardMaterial3D.new()
-	mat.use_vertex_color = true
+	mat.vertex_color_use_as_albedo = true
 	mat.emission_enabled = true
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mm.mesh.surface_set_material(0, mat)
