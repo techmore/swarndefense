@@ -22,7 +22,7 @@ func on_enemy_spawned() -> void:
     enemies_alive += 1
 
 func on_enemy_killed() -> void:
-    enemies_alive -= 1
+    enemies_alive = max(enemies_alive - 1, 0)
     if enemies_alive <= 0 and wave_active:
         _end_wave()
 

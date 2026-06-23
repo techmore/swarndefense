@@ -18,8 +18,8 @@ func _ready() -> void:
 	add_to_group("buildings")
 
 func take_damage(amount: float, attacker: Node = null) -> void:
-	health -= amount
-	if health <= 0:
+	health = max(health - amount, 0.0)
+	if health <= 0.0:
 		destroy()
 
 func destroy() -> void:

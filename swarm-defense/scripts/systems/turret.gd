@@ -1,6 +1,13 @@
 class_name Turret
 extends Building
 
+var targeting_range: float = 80.0
+var damage: float = 15.0
+var fire_rate: float = 0.5
+var _cooldown: float = 0.0
+var _barrel: MeshInstance3D
+var _target: Node3D = null
+
 func _ready() -> void:
 	building_name = "Turret"
 	resource_costs = {"metal": 200, "crystal": 100}
@@ -15,13 +22,6 @@ func _ready() -> void:
 
 	build_mesh()
 	add_collision()
-
-var targeting_range: float = 80.0
-var damage: float = 15.0
-var fire_rate: float = 0.5
-var _cooldown: float = 0.0
-var _barrel: MeshInstance3D
-var _target: Node3D = null
 
 func build_mesh() -> void:
 	var base_model = load_gltf_mesh("res://assets/quaternius/megakit/columns/Column_Astra.gltf", Vector3.ONE * 0.6)

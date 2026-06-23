@@ -25,7 +25,9 @@ func toggle() -> void:
 func open() -> void:
 	is_open = true
 	show()
-	volume_slider.value = 1.0
+	# Reflect the actual master volume instead of forcing full volume on every open.
+	var db = AudioManager.get_master_volume()
+	volume_slider.value = clamp((db + 80.0) / 80.0, 0.0, 1.0)
 	get_tree().paused = true
 
 func close() -> void:

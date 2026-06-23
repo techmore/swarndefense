@@ -32,7 +32,7 @@ func _generate_field() -> void:
 	mat.albedo_color = Color(0.35, 0.30, 0.25)
 	mat.roughness = 0.9
 	mat.metallic = 0.1
-	mat.texture_filter = 0
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_NEAREST
 	base_mesh.surface_set_material(0, mat)
 
 	_multi_mesh = MultiMesh.new()

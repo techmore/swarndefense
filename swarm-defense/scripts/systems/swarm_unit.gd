@@ -5,6 +5,7 @@ var health: float = 30.0
 var speed: float = 12.0
 var contact_damage: float = 5.0
 var resource_drop: Dictionary = {"metal": 5}
+var velocity: Vector3 = Vector3.ZERO
 var _target: Node3D = null
 
 signal killed(unit: Node)
@@ -92,8 +93,6 @@ func _physics_process(delta: float) -> void:
 		velocity = dir * speed
 		look_at(global_position + velocity, Vector3.UP)
 	global_position += velocity * delta
-
-var velocity: Vector3 = Vector3.ZERO
 
 func _find_target() -> void:
 	if _target and is_instance_valid(_target):

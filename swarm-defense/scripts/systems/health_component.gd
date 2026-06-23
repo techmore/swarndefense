@@ -25,7 +25,7 @@ func heal(amount: float) -> void:
     health_changed.emit(health)
 
 func get_health_percent() -> float:
-    return health / max_health
+    return clamp(health / max_health, 0.0, 1.0)
 
 func is_alive() -> bool:
     return health > 0.0

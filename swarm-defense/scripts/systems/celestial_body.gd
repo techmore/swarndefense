@@ -75,7 +75,7 @@ func _setup_mesh() -> void:
 		material.albedo_color = color
 	material.metallic = 0.1
 	material.roughness = 0.85
-	material.texture_filter = 1
+	material.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR
 
 	_finalize_mesh(sphere, material)
 

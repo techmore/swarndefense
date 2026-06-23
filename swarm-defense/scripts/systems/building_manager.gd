@@ -89,7 +89,7 @@ func _recalculate_power(delta: float) -> void:
 	power_surplus = net
 
 func has_power_for(building_type: String) -> bool:
-	if building_type == "SolarPanel" or building_type == "Battery":
+	if building_type in ["Solar Panel", "SolarPanel", "Battery"]:
 		return true
 	if total_generation >= total_consumption:
 		return true

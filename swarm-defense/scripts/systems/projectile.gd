@@ -44,6 +44,6 @@ func _physics_process(delta: float) -> void:
 func _on_hit(body: Node) -> void:
 	if body.is_in_group(_owner_group):
 		return
-	if body.has_method("take_damage") and not body.is_in_group(_owner_group):
+	if body.has_method("take_damage"):
 		body.take_damage(damage, self)
 		queue_free()

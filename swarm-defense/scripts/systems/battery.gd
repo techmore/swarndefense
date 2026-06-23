@@ -1,6 +1,10 @@
 class_name Battery
 extends Building
 
+var power_storage: float = 200.0
+var stored_power: float = 0.0
+var glow_material: StandardMaterial3D
+
 func _ready() -> void:
 	building_name = "Battery"
 	resource_costs = {"metal": 50, "crystal": 75}
@@ -13,10 +17,6 @@ func _ready() -> void:
 
 	build_mesh()
 	add_collision()
-
-var power_storage: float = 200.0
-var stored_power: float = 0.0
-var glow_material: StandardMaterial3D
 
 func build_mesh() -> void:
 	var platform = load_gltf_mesh("res://assets/quaternius/megakit/platforms/Platform_Squares.gltf", Vector3.ONE * 0.7)
