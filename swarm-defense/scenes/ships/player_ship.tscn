@@ -1,27 +1,130 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/ships/player_ship.gd" id="1"]
 
 [sub_resource type="BoxMesh" id="1"]
-size = Vector3(2, 0.5, 4)
+size = Vector3(1.0, 0.35, 2.8)
 
-[sub_resource type="StandardMaterial3D" id="2"]
-albedo_color = Color(0.2, 0.6, 0.9, 1)
+[sub_resource type="BoxMesh" id="2"]
+size = Vector3(0.15, 0.06, 0.5)
 
-[sub_resource type="BoxShape3D" id="3"]
-size = Vector3(2, 0.5, 4)
+[sub_resource type="StandardMaterial3D" id="3"]
+albedo_color = Color(0.15, 0.18, 0.25, 1)
+metallic = 0.7
+roughness = 0.3
+
+[sub_resource type="StandardMaterial3D" id="4"]
+albedo_color = Color(0.02, 0.45, 0.8, 1)
+metallic = 0.3
+roughness = 0.2
+emission_enabled = true
+emission = Color(0.02, 0.4, 0.9, 1)
+emission_energy_multiplier = 1.5
+
+[sub_resource type="CylinderMesh" id="5"]
+radius = 0.15
+height = 0.3
+
+[sub_resource type="SphereMesh" id="6"]
+radius = 0.2
+height = 0.4
+
+[sub_resource type="StandardMaterial3D" id="7"]
+albedo_color = Color(0.0, 0.0, 0.0, 1)
 
 [node name="PlayerShip" type="CharacterBody3D"]
 script = ExtResource("1")
+collision_mask = 0
 
-[node name="Mesh" type="MeshInstance3D" parent="."]
+[node name="Fuselage" type="MeshInstance3D" parent="."]
 mesh = SubResource("1")
-material_override = SubResource("2")
+material_override = SubResource("3")
+
+[node name="Nose" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, 0.0, -1.6)
+mesh = SubResource("6")
+material_override = SubResource("3")
+scale = Vector3(1, 1, 1.2)
+
+[node name="WingLeft" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0.0, 0.3)
+mesh = SubResource("1")
+material_override = SubResource("3")
+scale = Vector3(1.5, 1, 0.3)
+
+[node name="WingRight" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0.0, 0.3)
+mesh = SubResource("1")
+material_override = SubResource("3")
+scale = Vector3(1.5, 1, 0.3)
+
+[node name="EngineLeft" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.35, -0.1, 1.5)
+mesh = SubResource("5")
+material_override = SubResource("7")
+
+[node name="EngineRight" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, -0.1, 1.5)
+mesh = SubResource("5")
+material_override = SubResource("7")
+
+[node name="EngineAccentLeft" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.35, -0.1, 1.65)
+mesh = SubResource("2")
+material_override = SubResource("4")
+
+[node name="EngineAccentRight" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, -0.1, 1.65)
+mesh = SubResource("2")
+material_override = SubResource("4")
+
+[node name="Cockpit" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, 0.3, -0.5)
+mesh = SubResource("6")
+material_override = SubResource("4")
+scale = Vector3(0.8, 0.6, 0.6)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-shape = SubResource("3")
+shape = SubResource("1")
+
+[node name="ThrusterMain" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, 0.0, 1.8)
+amount = 50
+lifetime = 0.4
+preprocess = 0.5
+one_shot = false
+explosiveness = 0.5
+randomness = 0.3
+local_coords = true
+draw_order = 1
+
+[node name="ThrusterLeft" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.35, 0.0, 1.5)
+amount = 15
+lifetime = 0.25
+preprocess = 0.3
+one_shot = false
+explosiveness = 0.3
+randomness = 0.4
+local_coords = true
+
+[node name="ThrusterRight" type="GPUParticles3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, 0.0, 1.5)
+amount = 15
+lifetime = 0.25
+preprocess = 0.3
+one_shot = false
+explosiveness = 0.3
+randomness = 0.4
+local_coords = true
+
+[node name="Headlight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, 0.2, -1.8)
+light_energy = 0.3
+omni_range = 50.0
 
 [node name="CameraPivot" type="Node3D" parent="."]
 
 [node name="SpringArm3D" type="SpringArm3D" parent="CameraPivot"]
-spring_length = 15.0
+spring_length = 12.0
+margin = 0.5
