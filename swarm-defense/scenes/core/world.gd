@@ -21,8 +21,8 @@ func _setup_starfield() -> void:
 	mm.mesh = SphereMesh.new()
 	mm.mesh.radius = 0.15
 	mm.mesh.height = 0.3
-	mm.mesh.subdivide_depth = 0
-	mm.mesh.subdivide_width = 0
+	mm.mesh.rings = 1
+	mm.mesh.radial_segments = 4
 
 	var mat = StandardMaterial3D.new()
 	mat.albedo_color = Color(0.9, 0.9, 1.0, 1)

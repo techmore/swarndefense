@@ -11,9 +11,9 @@ func _ready() -> void:
         _player_ship = ships[0]
 
 func _process(delta: float) -> void:
-    if not _player_ship or not _player_ship.has_method("get_velocity"):
+    if not _player_ship or not _player_ship.has_method("get_ship_velocity"):
         return
-    var vel: Vector3 = _player_ship.get_velocity()
+    var vel: Vector3 = _player_ship.get_ship_velocity()
     var speed = vel.length()
     var boost: float = _player_ship.get_boost()
 
