@@ -184,6 +184,10 @@ h1 {
 <h1>⬡ SWARM DEFENSE</h1>
 <div class="subtitle">Development Roadmap — Godot 4.7 — Last updated 2026-06-23</div>
 
+<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1rem 1.5rem;margin-bottom:2rem;font-size:0.85rem;line-height:1.6">
+  <strong style="color:var(--accent)">Game Loop:</strong> You pilot a spacecraft launching from Earth's atmosphere. A Swarm attacks immediately — text popups and objective guides walk you through establishing a forward operating base. Build solar panels for power, turrets for defense, extractors for resources. The camera follows your ship by default (your main character). Your ship has health, shields, ammo, and upgrade slots (hull, shields, weapons, engines). Research new tech to unlock stronger buildings and ship modules. Survive escalating wave defenses with up to 16 players in co-op.
+</div>
+
 <div class="summary-bar" id="summary">
   <div class="summary-stat"><span class="num" id="total-steps">0</span><span class="label">Steps</span></div>
   <div class="summary-stat"><span class="num" id="done-steps">0</span><span class="label">Done</span></div>
@@ -251,10 +255,15 @@ const PHASES = [
       { label: "Angular velocity damping for smooth rotation", done: true },
       { label: "Camera: WASD free pan when mouse visible, auto-return when captured", done: true },
       { label: "Camera center: C key / HUD button resets pan to ship", done: true },
-      { label: "Intro sequence: launchpad, typewriter text, scripted swarm kills", done: true },
+      { label: "Intro sequence: ship launches from Earth, camera follows", done: true },
+      { label: "Intro: swarm attack with typewriter text popups", done: true },
+      { label: "Intro: objective instructions to begin construction", done: true },
       { label: "Objective tracker: guided build/mine objectives after intro", done: true },
+      { label: "Ship health system + shield regen", done: false },
+      { label: "Ship weapon ammo / energy system", done: false },
+      { label: "Ship upgrade slots (hull, shields, weapons, engines)", done: false },
     ],
-    milestone: "Player flies through solar system, ship looks good, HUD works"
+    milestone: "Ship launches from Earth, intro guides player, ship has health/shields/ammo"
   },
   {
     num: 3, title: "Resource System & Mining", week: "Weeks 4–6",
@@ -284,7 +293,7 @@ const PHASES = [
       { label: "Ghost preview — green/red valid/invalid", done: true },
       { label: "Building types: Extractor, SolarPanel, Battery, Turret, V1Station", done: true },
       { label: "Snap-together mechanics (snap_offset)", done: true },
-      { label: "Upgrade system", done: false },
+      { label: "Building upgrade system (tier 2/3 buildings)", done: false },
       { label: "Radial build menu UI (B key)", done: true },
       { label: "V1 Station: large frame with turret mounts", done: true },
       { label: "Options panel (Tab): center ship, volume, keyboard ref, quit", done: true },
@@ -311,7 +320,7 @@ const PHASES = [
     color: "#aacc3a",
     steps: [
       { label: "SwarmUnit.gd base class (Node3D with cluster mesh)", done: true },
-      { label: "Unit types: Scout, Fighter, Tank, Carrier", done: false },
+      { label: "Unit types: Scout, Fighter, Tank, Carrier, each with unique behavior", done: false },
       { label: "Swarm AI: flies to nearest player ship or building", done: true },
       { label: "WaveManager — configs, escalation curve", done: true },
       { label: "Spawn patrol near Earth, wave units at distance", done: true },
@@ -344,6 +353,7 @@ const PHASES = [
     num: 8, title: "Tech Tree & Progression", week: "Weeks 16–18",
     color: "#3a99cc",
     steps: [
+      { label: "Ship upgrade system integrated with tech tree", done: false },
       { label: "Tech.gd resource (name, costs, prerequisites, unlocks)", done: false },
       { label: "TechManager — branching tree, research queue", done: false },
       { label: "Tech categories: Mining, Power, Defense, Logistics", done: false },
