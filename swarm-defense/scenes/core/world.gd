@@ -54,6 +54,7 @@ func _setup_celestial_bodies() -> void:
 
 	var planet_scene = preload("res://scenes/celestial/planet.tscn")
 
+	var earth_node: Node3D = null
 	var planet_data = [
 		{
 			"name": "Mercury",
@@ -91,6 +92,7 @@ func _setup_celestial_bodies() -> void:
 
 	for data in planet_data:
 		var planet = planet_scene.instantiate()
+		planet.name = data["name"]
 		planet.body_name = data["name"]
 		planet.semi_major_axis = data["axis"]
 		planet.orbital_period = data["period"]
@@ -104,21 +106,25 @@ func _setup_celestial_bodies() -> void:
 		planet.color = data["color"]
 		planet.show_orbit_trail = true
 		celestial_system.add_child(planet)
+		if data["name"] == "Earth":
+			earth_node = planet
 
-	var moon = planet_scene.instantiate()
-	moon.body_name = "Moon"
-	moon.semi_major_axis = 18.0
-	moon.orbital_period = 6.0
-	moon.body_radius = 2.0
-	moon.planet_type = PlanetTextureGenerator.PlanetType.MOON
-	moon.texture_seed = 999
-	moon.noise_frequency = 5.0
-	moon.eccentricity = 0.01
-	moon.initial_angle = PI
-	moon.color = Color(0.6, 0.58, 0.55)
-	moon.has_atmosphere = false
-	moon.show_orbit_trail = false
-	celestial_system.get_node("Earth").add_child(moon)
+	if earth_node:
+		var moon = planet_scene.instantiate()
+		moon.name = "Moon"
+		moon.body_name = "Moon"
+		moon.semi_major_axis = 18.0
+		moon.orbital_period = 6.0
+		moon.body_radius = 2.0
+		moon.planet_type = PlanetTextureGenerator.PlanetType.MOON
+		moon.texture_seed = 999
+		moon.noise_frequency = 5.0
+		moon.eccentricity = 0.01
+		moon.initial_angle = PI
+		moon.color = Color(0.6, 0.58, 0.55)
+		moon.has_atmosphere = false
+		moon.show_orbit_trail = false
+		earth_node.add_child(moon)
 
 func _spawn_player() -> void:
 	var ship = preload("res://scenes/ships/player_ship.tscn").instantiate()
