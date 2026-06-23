@@ -25,8 +25,11 @@ func _setup_sky() -> void:
 		mat.shader = shader
 		sky.sky_material = mat
 		we.environment.sky = sky
-		we.environment.sky_custom_fov = 120.0
+		we.environment.sky_custom_fov = 130.0
 		we.environment.background_mode = Environment.BG_SKY
+		if mat.has_method("set_shader_parameter"):
+			mat.set_shader_parameter("star_density", 1.5)
+			mat.set_shader_parameter("galaxy_brightness", 2.0)
 
 func _setup_asteroid_field() -> void:
 	var field = AsteroidField.new()
