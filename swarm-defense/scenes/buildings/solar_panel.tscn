@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://c6xq2ocph2n6r"]
+[gd_scene format=3 uid="uid://c6xq2ocph2n6r"]
 
 [ext_resource type="Script" path="res://scripts/systems/solar_panel.gd" id="1_mw26b"]
 
