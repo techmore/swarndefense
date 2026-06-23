@@ -77,6 +77,8 @@ func _setup_celestial_bodies() -> void:
 			"seed": 137, "freq": 2.0,
 			"ecc": 0.03, "incl": 0.02, "rot": -240.0,
 			"color": Color(0.9, 0.7, 0.4),
+			"clouds": true,
+			"cloud_speed": 0.03,
 		},
 		{
 			"name": "Earth",
@@ -85,6 +87,8 @@ func _setup_celestial_bodies() -> void:
 			"seed": 73, "freq": 2.5,
 			"ecc": 0.02, "incl": 0.0, "rot": 1.0,
 			"color": Color(0.2, 0.5, 0.8),
+			"clouds": true,
+			"cloud_speed": 0.02,
 		},
 		{
 			"name": "Mars",
@@ -111,6 +115,9 @@ func _setup_celestial_bodies() -> void:
 		planet.rotation_period = data["rot"]
 		planet.color = data["color"]
 		planet.show_orbit_trail = true
+		if data.get("clouds", false):
+			planet.has_clouds = true
+			planet.cloud_speed = data.get("cloud_speed", 0.02)
 		celestial_system.add_child(planet)
 		if data["name"] == "Earth":
 			earth_node = planet

@@ -15,27 +15,55 @@ extends Node3D
 @export var noise_frequency: float = 3.0
 @export var show_orbit_trail: bool = true
 @export var has_atmosphere: bool = true
+@export var use_disk_texture: bool = true
+@export var has_clouds: bool = false
+@export var cloud_speed: float = 0.02
 
 var _time: float = 0.0
 var _mesh_instance: MeshInstance3D
+var _clouds_instance: MeshInstance3D
 var _atmosphere_instance: MeshInstance3D
 var _orbit_trail: MeshInstance3D
 
 func _ready() -> void:
 	_setup_mesh()
+	_setup_clouds()
 	_setup_atmosphere()
 	if show_orbit_trail:
 		_setup_orbit_trail()
+
+func _get_texture_path(name_suffix: String) -> String:
+	var name = body_name.to_lower()
+	var path = "res://assets/textures/planets/%s_%s.jpg" % [name, name_suffix]
+	if ResourceLoader.exists(path):
+		return path
+	path = "res://assets/textures/planets/%s_%s.png" % [name, name_suffix]
+	if ResourceLoader.exists(path):
+		return path
+	return ""
 
 func _setup_mesh() -> void:
 	_mesh_instance = MeshInstance3D.new()
 	var sphere = SphereMesh.new()
 	sphere.radius = body_radius
 	sphere.height = body_radius * 2.0
-	sphere.rings = 6
-	sphere.radial_segments = 10
+	sphere.rings = 10
+	sphere.radial_segments = 16
 
 	var material = StandardMaterial3D.new()
+
+	if use_disk_texture:
+		var tex_path = _get_texture_path("albedo")
+		if not tex_path.is_empty():
+			var tex = load(tex_path) as Texture2D
+			if tex:
+				material.albedo_texture = tex
+				material.albedo_color = Color.WHITE
+				material.roughness = 0.9
+				material.metallic = 0.0
+				material.texel_size = 0.001
+				return _finalize_mesh(sphere, material)
+
 	if texture_seed != 0:
 		var texture = PlanetTextureGenerator.generate_texture(planet_type, texture_seed, noise_frequency)
 		material.albedo_texture = texture
@@ -46,6 +74,9 @@ func _setup_mesh() -> void:
 	material.roughness = 0.85
 	material.texture_filter = 1
 
+	_finalize_mesh(sphere, material)
+
+func _finalize_mesh(sphere: SphereMesh, material: StandardMaterial3D) -> void:
 	_mesh_instance.mesh = sphere
 	_mesh_instance.material_override = material
 	add_child(_mesh_instance)
@@ -60,6 +91,37 @@ func _setup_mesh() -> void:
 	area.add_child(collision.duplicate())
 	add_child(area)
 
+func _setup_clouds() -> void:
+	if not has_clouds:
+		return
+
+	var cloud_path = _get_texture_path("clouds")
+	if cloud_path.is_empty():
+		return
+
+	var cloud_tex = load(cloud_path) as Texture2D
+	if not cloud_tex:
+		return
+
+	_clouds_instance = MeshInstance3D.new()
+	var cloud_sphere = SphereMesh.new()
+	cloud_sphere.radius = body_radius * 1.02
+	cloud_sphere.height = body_radius * 2.04
+	cloud_sphere.rings = 8
+	cloud_sphere.radial_segments = 14
+
+	var cloud_mat = StandardMaterial3D.new()
+	cloud_mat.albedo_texture = cloud_tex
+	cloud_mat.albedo_color = Color(1, 1, 1, 0.6)
+	cloud_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	cloud_mat.cull_mode = BaseMaterial3D.CULL_BACK
+	cloud_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+
+	_clouds_instance.mesh = cloud_sphere
+	_clouds_instance.material_override = cloud_mat
+	_clouds_instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(_clouds_instance)
+
 func _setup_atmosphere() -> void:
 	if not has_atmosphere:
 		return
@@ -71,8 +133,8 @@ func _setup_atmosphere() -> void:
 	var atmo_sphere = SphereMesh.new()
 	atmo_sphere.radius = body_radius * 1.08
 	atmo_sphere.height = body_radius * 2.16
-	atmo_sphere.rings = 4
-	atmo_sphere.radial_segments = 8
+	atmo_sphere.rings = 6
+	atmo_sphere.radial_segments = 10
 
 	var atmo_mat = StandardMaterial3D.new()
 	atmo_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -116,6 +178,9 @@ func _process(delta: float) -> void:
 		_time += delta
 	position = _get_orbital_position(_time)
 	rotation.y += (2.0 * PI / rotation_period) * delta
+
+	if _clouds_instance:
+		_clouds_instance.rotation.y += cloud_speed * delta
 
 	if _atmosphere_instance:
 		_atmosphere_instance.rotation.y += (2.0 * PI / rotation_period) * delta * 0.5

@@ -1,0 +1,78 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/tools/download_planet_textures.gd" id="1"]
+
+[node name="TextureDownloader" type="Control"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Label" type="Label" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.3
+anchor_right = 0.5
+anchor_bottom = 0.3
+offset_left = -300.0
+offset_top = -40.0
+offset_right = 300.0
+offset_bottom = 40.0
+grow_horizontal = 2
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+text = "Planet Texture Downloader"
+
+[node name="Instructions" type="RichTextLabel" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.42
+anchor_right = 0.5
+anchor_bottom = 0.42
+offset_left = -300.0
+offset_top = -20.0
+offset_right = 300.0
+offset_bottom = 80.0
+grow_horizontal = 2
+text = "Downloads NASA-style planet textures from Solar System Scope ([color=yellow]CC license[/color]).\nTextures are saved to [color=cyan]res://assets/textures/planets/[/color].\n\n[color=gray]Requires internet connection. Downloads ~40 MB total.[/color]"
+
+[node name="DownloadBtn" type="Button" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.6
+anchor_right = 0.5
+anchor_bottom = 0.6
+offset_left = -150.0
+offset_top = -25.0
+offset_right = 150.0
+offset_bottom = 25.0
+grow_horizontal = 2
+text = "DOWNLOAD TEXTURES"
+
+[node name="Status" type="Label" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.68
+anchor_right = 0.5
+anchor_bottom = 0.68
+offset_left = -300.0
+offset_top = -15.0
+offset_right = 300.0
+offset_bottom = 15.0
+grow_horizontal = 2
+horizontal_alignment = 1
+
+[node name="Credits" type="RichTextLabel" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.78
+anchor_right = 0.5
+anchor_bottom = 0.78
+offset_left = -300.0
+offset_top = -15.0
+offset_right = 300.0
+offset_bottom = 15.0
+grow_horizontal = 2
+text = "Textures by [color=yellow]Solar System Scope[/color] (solarsystemscope.com) — CC BY 4.0"
