@@ -43,7 +43,6 @@ func _setup_build_menu() -> void:
 func _setup_starfield() -> void:
 	var mm = MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.color_format = MultiMesh.COLOR_8BIT
 	mm.instance_count = 4000
 	mm.mesh = SphereMesh.new()
 	mm.mesh.radius = 0.15
