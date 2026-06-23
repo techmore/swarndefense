@@ -6,12 +6,26 @@ extends Node3D
 
 func _ready() -> void:
 	GameManager.change_phase(GameManager.GamePhase.PLAYING)
+	_setup_sky()
 	_setup_starfield()
 	_setup_celestial_bodies()
 	_setup_asteroid_field()
 	_spawn_player()
 	_setup_hud()
 	_setup_build_menu()
+
+func _setup_sky() -> void:
+	var we = $WorldEnvironment
+	if not we or not we.environment:
+		return
+	var sky = Sky.new()
+	var mat = ShaderMaterial.new()
+	var shader = load("res://scripts/shaders/space_sky.gdshader") as Shader
+	if shader:
+		mat.shader = shader
+		sky.sky_material = mat
+		we.environment.sky = sky
+		we.environment.sky_custom_fov = 120.0
 
 func _setup_asteroid_field() -> void:
 	var field = AsteroidField.new()
@@ -29,7 +43,8 @@ func _setup_build_menu() -> void:
 func _setup_starfield() -> void:
 	var mm = MultiMesh.new()
 	mm.transform_format = MultiMesh.TRANSFORM_3D
-	mm.instance_count = 2000
+	mm.color_format = MultiMesh.COLOR_8BIT
+	mm.instance_count = 4000
 	mm.mesh = SphereMesh.new()
 	mm.mesh.radius = 0.15
 	mm.mesh.height = 0.3
@@ -37,9 +52,8 @@ func _setup_starfield() -> void:
 	mm.mesh.radial_segments = 4
 
 	var mat = StandardMaterial3D.new()
-	mat.albedo_color = Color(0.9, 0.9, 1.0, 1)
+	mat.use_vertex_color = true
 	mat.emission_enabled = true
-	mat.emission = Color(0.9, 0.9, 1.0)
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mm.mesh.surface_set_material(0, mat)
 
@@ -53,8 +67,14 @@ func _setup_starfield() -> void:
 			r * cos(phi),
 			r * sin(phi) * sin(theta)
 		)
-		t = t.scaled(Vector3.ONE * (0.5 + randf() * 1.5))
+		var size = 0.3 + randf() * 1.8
+		t = t.scaled(Vector3.ONE * size)
 		mm.set_instance_transform(i, t)
+		var color_v = 0.7 + randf() * 0.3
+		var color = Color(color_v, color_v, 1.0)
+		if randf() > 0.7:
+			color = Color(color_v, color_v * 0.8, color_v * 0.6)
+		mm.set_instance_color(i, color)
 
 	var mmi = MultiMeshInstance3D.new()
 	mmi.multimesh = mm
@@ -147,5 +167,9 @@ func _setup_celestial_bodies() -> void:
 
 func _spawn_player() -> void:
 	var ship = preload("res://scenes/ships/player_ship.tscn").instantiate()
-	ship.global_position = Vector3(450, 20, 0)
+	ship.global_position = Vector3(415, 0, 0)
 	$PlayerShips.add_child(ship)
+	if camera_manager and camera_manager.has_method("follow_target"):
+		camera_manager.follow_target(ship.global_position)
+		camera_manager.zoom_distance = 160.0
+		camera_manager._update_zoom_level()

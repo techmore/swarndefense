@@ -30,7 +30,7 @@ func _process(delta: float) -> void:
 	if _player_ship.has_method("get_cargo") and _player_ship.has_method("get_cargo_total"):
 		var cargo = _player_ship.get_cargo()
 		var total = _player_ship.get_cargo_total()
-		var cap = _player_ship.cargo_capacity if _player_ship.has_property("cargo_capacity") else 500
+		var cap = _player_ship.cargo_capacity if "cargo_capacity" in _player_ship else 500
 		var metal = cargo.get("metal", 0)
 		var crystal = cargo.get("crystal", 0)
 		cargo_label.text = "CARGO: %d/%d  [M:%d  C:%d]" % [total, cap, metal, crystal]
