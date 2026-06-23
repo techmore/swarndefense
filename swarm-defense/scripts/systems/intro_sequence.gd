@@ -22,10 +22,6 @@ func begin(world: Node3D, ship: Node3D) -> void:
 	_run_sequence()
 
 func _run_sequence() -> void:
-	# Ensure perpendicular view at system scale
-	if _cam and _cam.has_method("set_perpendicular"):
-		_cam.set_perpendicular()
-
 	# Phase 1: text over the full solar system view
 	await _overlay.play_intro()
 
@@ -47,8 +43,7 @@ func _run_sequence() -> void:
 	await _overlay.play_outro()
 
 	# Lock camera to ship before launch
-	if _cam and _cam.has_method("center_on_ship"):
-		_follow_ship()
+	_follow_ship()
 
 	_animate_ship_launch()
 	await _wait(2.0)
@@ -58,14 +53,12 @@ func _run_sequence() -> void:
 # ── Camera helpers ───────────────────────────────────────
 
 func _zoom_to_earth(duration: float) -> void:
-	if not _cam:
+	if not _cam or not is_instance_valid(_ship):
 		return
-	var earth_pos = _find_earth_position()
-	var look_pos = earth_pos + Vector3(0, 15, 0)
 	if _cam.has_method("smooth_zoom_to"):
-		_cam.smooth_zoom_to(80.0, look_pos, duration)
+		_cam.smooth_zoom_to(80.0, _ship.global_position, duration)
 	elif _cam.has_method("follow_target"):
-		_cam.follow_target(look_pos)
+		_cam.follow_target(_ship.global_position)
 		_cam.set("zoom_distance", 80.0)
 
 func _follow_ship() -> void:

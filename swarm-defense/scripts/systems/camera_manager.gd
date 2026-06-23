@@ -20,8 +20,6 @@ var _rotation_v: float = -0.5
 @export var pan_return_speed: float = 3.0
 
 func _ready() -> void:
-	current_zoom = ZoomLevel.SYSTEM
-	zoom_distance = system_distance
 	make_current()
 	var ships = get_tree().get_nodes_in_group("player_ship")
 	if ships.size() > 0:
