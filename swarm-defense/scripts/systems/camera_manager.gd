@@ -3,12 +3,12 @@ extends Camera3D
 enum ZoomLevel { SYSTEM, PLANETARY, SURFACE }
 
 var current_zoom: ZoomLevel = ZoomLevel.SYSTEM
-var _follow_target: Vector3 = Vector3.ZERO
+var _follow_target: Vector3 = Vector3(400, 0, 0)
 var _pan_offset: Vector3 = Vector3.ZERO
-target_position: Vector3 = Vector3.ZERO
-zoom_distance: float = 1200.0
-_rotation_h: float = 0.0
-_rotation_v: float = -1.42
+var target_position: Vector3 = Vector3(400, 0, 0)
+var zoom_distance: float = 500.0
+var _rotation_h: float = -0.3
+var _rotation_v: float = -0.5
 
 @export var system_distance: float = 1500.0
 @export var planetary_distance: float = 100.0
@@ -131,7 +131,7 @@ func smooth_zoom_to(distance: float, target: Vector3, duration: float = 2.0) -> 
 	tw.tween_method(_set_zoom_distance, zoom_distance, distance, duration).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 	_follow_target = target
 	tw.tween_property(self, "target_position", target, duration).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
-	tw.chain().callback(_update_zoom_level)
+	tw.chain().tween_callback(_update_zoom_level)
 
 ## Smoothly pan follow target without changing zoom.
 func smooth_follow_to(target: Vector3, duration: float = 1.5) -> void:
