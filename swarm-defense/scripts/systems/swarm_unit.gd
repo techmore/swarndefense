@@ -9,8 +9,20 @@ var _target: Node3D = null
 
 signal killed(unit: Node)
 
+static var _model_paths: Array[String] = [
+	"res://assets/quaternius/aliens/Alien_Cyclop.gltf",
+	"res://assets/quaternius/aliens/Alien_Oculichrysalis.gltf",
+	"res://assets/quaternius/aliens/Alien_Scolitex.gltf",
+	"res://assets/quaternius/ships/Omen.gltf",
+	"res://assets/quaternius/ships/Insurgent.gltf",
+]
+
 func _ready() -> void:
 	add_to_group("swarm")
+	_setup_hitbox()
+	_load_model()
+
+func _setup_hitbox() -> void:
 	var area = Area3D.new()
 	area.name = "Hitbox"
 	var coll = CollisionShape3D.new()
@@ -21,6 +33,21 @@ func _ready() -> void:
 	add_child(area)
 	area.body_entered.connect(_on_body_entered)
 
+func _load_model() -> void:
+	var idx = randi() % _model_paths.size()
+	var path = _model_paths[idx]
+	var scene = load(path) as PackedScene
+	if not scene:
+		_generate_fallback_mesh()
+		return
+	var instance = scene.instantiate() as Node3D
+	if instance:
+		instance.name = "SwarmModel"
+		var s = 0.3 + randf() * 0.4
+		instance.scale = Vector3.ONE * s
+		add_child(instance)
+
+func _generate_fallback_mesh() -> void:
 	var mat = StandardMaterial3D.new()
 	mat.albedo_color = Color(0.9, 0.15, 0.1)
 	mat.metallic = 0.3

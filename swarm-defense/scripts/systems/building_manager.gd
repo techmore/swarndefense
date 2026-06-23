@@ -1,12 +1,13 @@
 extends Node
 
-var _buildings: Array[Building] = []
+var _buildings: Array = []
 
-signal building_placed(building: Building)
-signal building_destroyed(building: Building)
+signal building_placed(building: Node)
+signal building_destroyed(building: Node)
 signal power_changed(generation: float, consumption: float, stored: float, storage_max: float)
+signal building_built(building_type: String)
 
-var _ghost: Building = null
+var _ghost = null
 var _build_mode: bool = false
 var _pending_scene: PackedScene = null
 
@@ -22,8 +23,8 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_recalculate_power(delta)
 
-func place_building(scene: PackedScene, position: Vector3, rotation_y: float) -> Building:
-	var building = scene.instantiate() as Building
+func place_building(scene: PackedScene, position: Vector3, rotation_y: float):
+	var building = scene.instantiate()
 	if not building:
 		return null
 
@@ -38,9 +39,10 @@ func place_building(scene: PackedScene, position: Vector3, rotation_y: float) ->
 	building.is_placed = true
 	_buildings.append(building)
 	building_placed.emit(building)
+	building_built.emit(building.building_name)
 	return building
 
-func remove_building(building: Building) -> void:
+func remove_building(building) -> void:
 	if building in _buildings:
 		_buildings.erase(building)
 		building_destroyed.emit(building)
@@ -59,7 +61,7 @@ func _recalculate_power(delta: float) -> void:
 			gen += b.power_generation
 		if b.power_consumption > 0:
 			con += b.power_consumption
-		if b is Battery:
+		if b.has_method("store_power"):
 			bat_stored += b.stored_power
 			bat_cap += b.power_storage
 
@@ -67,14 +69,14 @@ func _recalculate_power(delta: float) -> void:
 
 	if net > 0 and bat_cap > 0:
 		for b in _buildings:
-			if b is Battery and not b.is_queued_for_deletion():
+			if b.has_method("store_power") and not b.is_queued_for_deletion():
 				net = b.store_power(net)
 				if net <= 0:
 					break
 
 	if net < 0 and bat_stored > 0:
 		for b in _buildings:
-			if b is Battery and not b.is_queued_for_deletion() and b.stored_power > 0:
+			if b.has_method("store_power") and not b.is_queued_for_deletion() and b.stored_power > 0:
 				var drawn = b.draw_power(-net)
 				net += drawn
 				if net >= 0:
@@ -113,7 +115,7 @@ func enter_build_mode(scene: PackedScene) -> void:
 	if _ghost:
 		_ghost.queue_free()
 
-	var instance = scene.instantiate() as Building
+	var instance = scene.instantiate()
 	if not instance:
 		_build_mode = false
 		return
@@ -157,7 +159,7 @@ func confirm_placement() -> void:
 	place_building(_pending_scene, _ghost.global_position, _ghost.rotation.y)
 	exit_build_mode()
 
-func _validate_placement(building: Building) -> bool:
+func _validate_placement(building) -> bool:
 	for rtype in building.resource_costs:
 		if EconomyManager.get_amount(rtype) < building.resource_costs[rtype]:
 			return false
@@ -169,7 +171,7 @@ func _validate_placement(building: Building) -> bool:
 	return true
 
 func _find_snap_position(pos: Vector3) -> Vector3:
-	var nearest: Building = null
+	var nearest = null
 	var nearest_dist = 6.0
 
 	for b in _buildings:
@@ -186,7 +188,7 @@ func _find_snap_position(pos: Vector3) -> Vector3:
 	return pos
 
 func _find_snap_rotation(pos: Vector3) -> float:
-	var nearest: Building = null
+	var nearest = null
 	var nearest_dist = 8.0
 
 	for b in _buildings:
@@ -202,7 +204,7 @@ func _find_snap_rotation(pos: Vector3) -> float:
 		return atan2(dir.x, dir.z)
 	return 0.0
 
-func make_ghost_materials(building: Building) -> void:
+func make_ghost_materials(building) -> void:
 	for child in building.find_children("*", "MeshInstance3D"):
 		var mi = child as MeshInstance3D
 		if mi and mi.mesh:
@@ -226,8 +228,8 @@ func _set_ghost_color(valid: bool) -> void:
 func is_in_build_mode() -> bool:
 	return _build_mode
 
-func get_buildings_in_radius(center: Vector3, radius: float) -> Array[Building]:
-	var result: Array[Building] = []
+func get_buildings_in_radius(center: Vector3, radius: float) -> Array:
+	var result: Array = []
 	for b in _buildings:
 		if b.is_placed and not b.is_queued_for_deletion():
 			if b.global_position.distance_to(center) <= radius:
@@ -237,5 +239,5 @@ func get_buildings_in_radius(center: Vector3, radius: float) -> Array[Building]:
 func get_building_count() -> int:
 	return _buildings.size()
 
-func get_buildings() -> Array[Building]:
+func get_buildings() -> Array:
 	return _buildings.duplicate()

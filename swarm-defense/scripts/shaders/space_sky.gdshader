@@ -29,8 +29,8 @@ float milky_way(vec3 dir) {
 	return density * density;
 }
 
-void fragment() {
-	vec3 dir = normalize(EYE_DIR);
+void sky() {
+	vec3 dir = normalize(EYEDIR);
 	vec3 col = vec3(0.0);
 
 	float mw = milky_way(dir);
@@ -69,5 +69,5 @@ void fragment() {
 
 	col = max(col, vec3(0.001));
 
-	ALBEDO = col;
+	COLOR = col;
 }

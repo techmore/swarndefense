@@ -5,6 +5,7 @@ extends Node3D
 @onready var building_manager = $Buildings
 
 func _ready() -> void:
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 	GameManager.change_phase(GameManager.GamePhase.PLAYING)
 	_setup_sky()
 	_setup_starfield()
@@ -13,6 +14,7 @@ func _ready() -> void:
 	_spawn_player()
 	_setup_hud()
 	_setup_build_menu()
+	_setup_options_panel()
 	WaveManager.wave_ended.connect(_on_wave_ended)
 
 func _setup_sky() -> void:
@@ -33,7 +35,8 @@ func _setup_sky() -> void:
 			mat.set_shader_parameter("galaxy_brightness", 2.0)
 
 func _setup_asteroid_field() -> void:
-	var field = AsteroidField.new()
+	var AsteroidFieldScript = load("res://scripts/systems/asteroid_field.gd")
+	var field = AsteroidFieldScript.new()
 	field.name = "AsteroidField"
 	celestial_system.add_child(field)
 
@@ -61,6 +64,8 @@ func _setup_starfield() -> void:
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mm.mesh.surface_set_material(0, mat)
 
+	var colors = PackedColorArray()
+	colors.resize(mm.instance_count)
 	for i in range(mm.instance_count):
 		var t = Transform3D.IDENTITY
 		var theta = randf() * TAU
@@ -78,7 +83,8 @@ func _setup_starfield() -> void:
 		var color = Color(color_v, color_v, 1.0)
 		if randf() > 0.7:
 			color = Color(color_v, color_v * 0.8, color_v * 0.6)
-		mm.set_instance_color(i, color)
+		colors[i] = color
+	mm.color_array = colors
 
 	var mmi = MultiMeshInstance3D.new()
 	mmi.multimesh = mm
@@ -95,7 +101,7 @@ func _setup_celestial_bodies() -> void:
 		{
 			"name": "Mercury",
 			"axis": 180, "period": 20.0, "radius": 3.0,
-			"type": PlanetTextureGenerator.PlanetType.MERCURY,
+			"type": 0,
 			"seed": 42, "freq": 6.0,
 			"ecc": 0.05, "incl": 0.04, "rot": 58.0,
 			"color": Color(0.6, 0.55, 0.5),
@@ -103,7 +109,7 @@ func _setup_celestial_bodies() -> void:
 		{
 			"name": "Venus",
 			"axis": 280, "period": 35.0, "radius": 6.0,
-			"type": PlanetTextureGenerator.PlanetType.VENUS,
+			"type": 1,
 			"seed": 137, "freq": 2.0,
 			"ecc": 0.03, "incl": 0.02, "rot": -240.0,
 			"color": Color(0.9, 0.7, 0.4),
@@ -113,7 +119,7 @@ func _setup_celestial_bodies() -> void:
 		{
 			"name": "Earth",
 			"axis": 400, "period": 50.0, "radius": 7.0,
-			"type": PlanetTextureGenerator.PlanetType.EARTH,
+			"type": 2,
 			"seed": 73, "freq": 2.5,
 			"ecc": 0.02, "incl": 0.0, "rot": 1.0,
 			"color": Color(0.2, 0.5, 0.8),
@@ -123,7 +129,7 @@ func _setup_celestial_bodies() -> void:
 		{
 			"name": "Mars",
 			"axis": 520, "period": 65.0, "radius": 5.0,
-			"type": PlanetTextureGenerator.PlanetType.MARS,
+			"type": 3,
 			"seed": 2048, "freq": 3.5,
 			"ecc": 0.06, "incl": 0.03, "rot": 1.03,
 			"color": Color(0.8, 0.3, 0.2),
@@ -159,7 +165,7 @@ func _setup_celestial_bodies() -> void:
 		moon.semi_major_axis = 18.0
 		moon.orbital_period = 6.0
 		moon.body_radius = 2.0
-		moon.planet_type = PlanetTextureGenerator.PlanetType.MOON
+		moon.planet_type = 4
 		moon.texture_seed = 999
 		moon.noise_frequency = 5.0
 		moon.eccentricity = 0.01
@@ -170,13 +176,22 @@ func _setup_celestial_bodies() -> void:
 		earth_node.add_child(moon)
 
 func _spawn_player() -> void:
-	var ship = preload("res://scenes/ships/player_ship.tscn").instantiate()
+	var ship = preload("res://scenes/ships/player_ship.tscn").instantiate() as Node3D
 	ship.global_position = Vector3(412, 0, 0)
 	$PlayerShips.add_child(ship)
 	if camera_manager and camera_manager.has_method("follow_target"):
 		camera_manager.follow_target(ship.global_position)
 		camera_manager.zoom_distance = 70.0
 		camera_manager._update_zoom_level()
+	_start_intro(ship)
+
+func _start_intro(ship: Node3D) -> void:
+	var intro = load("res://scripts/systems/intro_sequence.gd").new()
+	add_child(intro)
+	intro.intro_finished.connect(_on_intro_finished)
+	intro.begin(self, ship)
+
+func _on_intro_finished() -> void:
 	_spawn_swarm_patrol()
 
 func _spawn_swarm_patrol() -> void:
@@ -214,6 +229,10 @@ func _spawn_wave_units(count: int, interval: float) -> void:
 		_spawn_swarm_unit(dist, spd)
 		if i < count - 1:
 			await get_tree().create_timer(interval).timeout
+
+func _setup_options_panel() -> void:
+	var opts = preload("res://scenes/ui/options_panel.tscn").instantiate()
+	add_child(opts)
 
 func _on_patrol_cleared() -> void:
 	await get_tree().create_timer(3.0).timeout

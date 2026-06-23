@@ -24,55 +24,47 @@ var _barrel: MeshInstance3D
 var _target: Node3D = null
 
 func build_mesh() -> void:
-	var base_mat = StandardMaterial3D.new()
-	base_mat.albedo_color = Color(0.4, 0.35, 0.3)
-	base_mat.metallic = 0.6
-	base_mat.roughness = 0.4
+	var base_model = load_gltf_mesh("res://assets/quaternius/megakit/columns/Column_Astra.gltf", Vector3.ONE * 0.6)
+	if base_model:
+		add_child(base_model)
 
-	var base = CylinderMesh.new()
-	base.top_radius = 1.0
-	base.bottom_radius = 1.5
-	base.height = 0.6
-	base.radial_segments = 12
-	base.material = base_mat
+	var platform = load_gltf_mesh("res://assets/quaternius/megakit/platforms/Platform_Round1.gltf", Vector3.ONE * 0.7)
+	if platform:
+		platform.position.y = 0.6
+		add_child(platform)
 
-	var base_mi = MeshInstance3D.new()
-	base_mi.mesh = base
-	add_child(base_mi)
+	var gun = load_gltf_mesh("res://assets/quaternius/guns/AR_1.gltf", Vector3.ONE * 2.0)
+	if gun:
+		gun.position = Vector3(0, 1.5, 0.5)
+		var r = gun.rotation_degrees
+		r.y = 90.0
+		gun.rotation_degrees = r
 
-	var turret_mat = StandardMaterial3D.new()
-	turret_mat.albedo_color = Color(0.5, 0.45, 0.4)
-	turret_mat.metallic = 0.6
-	turret_mat.roughness = 0.3
+		_barrel = MeshInstance3D.new()
+		var barrel_mesh = BoxMesh.new()
+		barrel_mesh.size = Vector3(0.1, 0.1, 0.1)
+		_barrel.mesh = barrel_mesh
+		_barrel.position = Vector3(0, 1.5, 1.0)
+		add_child(_barrel)
 
-	var turret = CylinderMesh.new()
-	turret.top_radius = 0.6
-	turret.bottom_radius = 0.8
-	turret.height = 1.0
-	turret.radial_segments = 12
-	turret.material = turret_mat
+		add_child(gun)
+	else:
+		var barrel_mat = StandardMaterial3D.new()
+		barrel_mat.albedo_color = Color(0.3, 0.3, 0.3)
+		barrel_mat.metallic = 0.8
+		barrel_mat.roughness = 0.2
 
-	var turret_mi = MeshInstance3D.new()
-	turret_mi.mesh = turret
-	turret_mi.position = Vector3(0, 0.8, 0)
-	add_child(turret_mi)
+		var barrel = CylinderMesh.new()
+		barrel.top_radius = 0.1
+		barrel.bottom_radius = 0.15
+		barrel.height = 2.0
+		barrel.radial_segments = 8
+		barrel.material = barrel_mat
 
-	var barrel_mat = StandardMaterial3D.new()
-	barrel_mat.albedo_color = Color(0.3, 0.3, 0.3)
-	barrel_mat.metallic = 0.8
-	barrel_mat.roughness = 0.2
-
-	var barrel = CylinderMesh.new()
-	barrel.top_radius = 0.1
-	barrel.bottom_radius = 0.15
-	barrel.height = 2.0
-	barrel.radial_segments = 8
-	barrel.material = barrel_mat
-
-	_barrel = MeshInstance3D.new()
-	_barrel.mesh = barrel
-	_barrel.position = Vector3(0, 1.5, 1.0)
-	add_child(_barrel)
+		_barrel = MeshInstance3D.new()
+		_barrel.mesh = barrel
+		_barrel.position = Vector3(0, 1.5, 1.0)
+		add_child(_barrel)
 
 func add_collision() -> void:
 	var coll = CollisionShape3D.new()

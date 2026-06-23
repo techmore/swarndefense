@@ -41,6 +41,10 @@ func _input(event: InputEvent) -> void:
 		zoom_distance *= (1.0 + zoom_speed)
 		_update_zoom_level()
 
+	if event.is_action("center_camera") and event.is_pressed():
+		_pan_offset = Vector3.ZERO
+		target_position = _follow_target
+
 func _update_zoom_level() -> void:
 	if zoom_distance > system_distance * 0.6:
 		current_zoom = ZoomLevel.SYSTEM
@@ -104,6 +108,10 @@ func _find_ship() -> Vector3:
 	if ships.size() > 0:
 		return ships[0].global_position
 	return _follow_target
+
+func center_on_ship() -> void:
+	_pan_offset = Vector3.ZERO
+	target_position = _follow_target
 
 func follow_target(new_target: Vector3) -> void:
 	_follow_target = new_target

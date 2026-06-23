@@ -19,18 +19,14 @@ var stored_power: float = 0.0
 var glow_material: StandardMaterial3D
 
 func build_mesh() -> void:
-	var body_mat = StandardMaterial3D.new()
-	body_mat.albedo_color = Color(0.3, 0.3, 0.35)
-	body_mat.metallic = 0.5
-	body_mat.roughness = 0.5
+	var platform = load_gltf_mesh("res://assets/quaternius/megakit/platforms/Platform_Squares.gltf", Vector3.ONE * 0.7)
+	if platform:
+		platform.position.y = -0.2
+		add_child(platform)
 
-	var body = BoxMesh.new()
-	body.size = Vector3(2.0, 1.5, 2.0)
-	body.material = body_mat
-
-	var body_mi = MeshInstance3D.new()
-	body_mi.mesh = body
-	add_child(body_mi)
+	var computer = load_gltf_mesh("res://assets/quaternius/megakit/props/Prop_Computer.gltf", Vector3.ONE * 0.8)
+	if computer:
+		add_child(computer)
 
 	glow_material = StandardMaterial3D.new()
 	glow_material.albedo_color = Color(0.0, 0.6, 1.0)
@@ -43,7 +39,7 @@ func build_mesh() -> void:
 
 	var glow_mi = MeshInstance3D.new()
 	glow_mi.mesh = glow
-	glow_mi.position = Vector3(0, 1.0, 0)
+	glow_mi.position = Vector3(0, 0.3, 0)
 	add_child(glow_mi)
 
 func add_collision() -> void:

@@ -9,6 +9,7 @@ var _resources: Dictionary = {}
 
 signal resource_changed(resource_type: String, new_amount: int)
 signal resource_depleted(resource_type: String)
+signal resource_deposited(resource_type: String, amount: int)
 
 func _ready() -> void:
     _resources["metal"] = ResourceEntry.new()
@@ -23,6 +24,8 @@ func add_resource(type: String, amount: int, source: String = "") -> int:
     var added = min(amount, entry.capacity - entry.amount) if entry.capacity > 0 else amount
     entry.amount += added
     resource_changed.emit(type, entry.amount)
+    if source == "ship_deposit":
+        resource_deposited.emit(type, added)
     return added
 
 func spend_resource(type: String, amount: int) -> bool:

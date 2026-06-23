@@ -17,42 +17,33 @@ var hub_mi: MeshInstance3D
 var glow_mi: MeshInstance3D
 
 func build_mesh() -> void:
-	var frame_mat = StandardMaterial3D.new()
-	frame_mat.albedo_color = Color(0.35, 0.38, 0.42)
-	frame_mat.metallic = 0.7
-	frame_mat.roughness = 0.3
+	var center = load_gltf_mesh("res://assets/quaternius/megakit/platforms/Platform_Round1.gltf", Vector3.ONE * 1.2)
+	if center:
+		add_child(center)
 
-	var hub = CylinderMesh.new()
-	hub.top_radius = 0.8
-	hub.bottom_radius = 1.2
-	hub.height = 1.5
-	hub.radial_segments = 12
-	hub.material = frame_mat
-
-	hub_mi = MeshInstance3D.new()
-	hub_mi.mesh = hub
-	add_child(hub_mi)
-
-	var ring = TorusMesh.new()
-	ring.inner_radius = 2.5
-	ring.outer_radius = 3.0
-	ring.rings = 8
-	ring.radial_segments = 16
-	ring.material = frame_mat
-
-	ring_mi = MeshInstance3D.new()
-	ring_mi.mesh = ring
-	add_child(ring_mi)
+	var column = load_gltf_mesh("res://assets/quaternius/megakit/columns/Column_Large_Straight.gltf", Vector3.ONE * 0.8)
+	if column:
+		column.position.y = 0.3
+		add_child(column)
 
 	var spokes = 6
 	for i in range(spokes):
 		var a = float(i) / float(spokes) * TAU
+		var wall = load_gltf_mesh("res://assets/quaternius/megakit/walls/WallAstra_Straight.gltf", Vector3.ONE * 0.6)
+		if wall:
+			wall.position = Vector3(cos(a) * 3.0, 0.5, sin(a) * 3.0)
+			wall.rotation.y = -a
+			add_child(wall)
 		var beam = BoxMesh.new()
-		beam.size = Vector3(0.1, 0.1, 3.0)
-		beam.material = frame_mat
+		beam.size = Vector3(0.1, 0.1, 3.5)
+		var beam_mat = StandardMaterial3D.new()
+		beam_mat.albedo_color = Color(0.35, 0.38, 0.42)
+		beam_mat.metallic = 0.7
+		beam_mat.roughness = 0.3
+		beam.material = beam_mat
 		var beam_mi = MeshInstance3D.new()
 		beam_mi.mesh = beam
-		beam_mi.position = Vector3(cos(a) * 1.5, 0, sin(a) * 1.5)
+		beam_mi.position = Vector3(cos(a) * 1.8, 0.5, sin(a) * 1.8)
 		beam_mi.look_at(Vector3.ZERO, Vector3.UP)
 		add_child(beam_mi)
 

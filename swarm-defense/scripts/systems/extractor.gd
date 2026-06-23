@@ -13,34 +13,20 @@ func _ready() -> void:
 	add_collision()
 
 func build_mesh() -> void:
-	var base = BoxMesh.new()
-	base.size = Vector3(2.5, 1.0, 2.5)
-	base.material = create_base_material(Color(0.4, 0.4, 0.5))
+	var platform = load_gltf_mesh("res://assets/quaternius/megakit/platforms/Platform_Metal.gltf", Vector3.ONE * 0.8)
+	if platform:
+		platform.position.y = -0.2
+		add_child(platform)
 
-	var base_mi = MeshInstance3D.new()
-	base_mi.mesh = base
-	add_child(base_mi)
+	var column = load_gltf_mesh("res://assets/quaternius/megakit/columns/Column_Tall.gltf", Vector3.ONE * 0.5)
+	if column:
+		column.position.y = 0.5
+		add_child(column)
 
-	var arm = BoxMesh.new()
-	arm.size = Vector3(0.3, 2.5, 0.3)
-	arm.material = create_base_material(Color(0.6, 0.55, 0.4))
-
-	var arm_mi = MeshInstance3D.new()
-	arm_mi.mesh = arm
-	arm_mi.position = Vector3(0, 2.0, 0)
-	add_child(arm_mi)
-
-	var drill = CylinderMesh.new()
-	drill.top_radius = 0.5
-	drill.bottom_radius = 1.2
-	drill.height = 1.0
-	drill.radial_segments = 8
-	drill.material = create_base_material(Color(0.7, 0.4, 0.2))
-
-	var drill_mi = MeshInstance3D.new()
-	drill_mi.mesh = drill
-	drill_mi.position = Vector3(0, 3.3, 0)
-	add_child(drill_mi)
+	var vent = load_gltf_mesh("res://assets/quaternius/megakit/props/Prop_Vent_Big.gltf", Vector3.ONE * 0.8)
+	if vent:
+		vent.position.y = 1.5
+		add_child(vent)
 
 func add_collision() -> void:
 	var coll = CollisionShape3D.new()

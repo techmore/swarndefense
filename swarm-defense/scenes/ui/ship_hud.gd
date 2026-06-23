@@ -6,6 +6,9 @@ extends CanvasLayer
 @onready var power_label: Label = $PowerLabel
 @onready var battery_label: Label = $BatteryLabel
 @onready var wave_label: Label = $WaveLabel
+@onready var center_btn: Button = $CenterBtn
+@onready var menu_btn: Button = $MenuBtn
+@onready var mouse_hint: Label = $MouseHint
 
 var _player_ship: Node = null
 var _building_manager: Node = null
@@ -19,6 +22,18 @@ func _ready() -> void:
 	_building_manager = get_tree().current_scene.find_child("Buildings", true, false)
 	WaveManager.wave_started.connect(_on_wave_started)
 	WaveManager.wave_ended.connect(_on_wave_ended)
+	center_btn.pressed.connect(_on_center_pressed)
+	menu_btn.pressed.connect(_on_menu_pressed)
+
+func _on_center_pressed() -> void:
+	var cam = get_viewport().get_camera_3d()
+	if cam and cam.has_method("center_on_ship"):
+		cam.center_on_ship()
+
+func _on_menu_pressed() -> void:
+	var opts = get_tree().current_scene.find_child("OptionsPanel", true, false)
+	if opts and opts.has_method("toggle"):
+		opts.toggle()
 
 func _process(delta: float) -> void:
 	if not _player_ship:
@@ -27,6 +42,7 @@ func _process(delta: float) -> void:
 	_update_ship_hud(delta)
 	_update_power_hud()
 	_update_wave_hud(delta)
+	_update_mouse_hint()
 
 func _update_ship_hud(delta: float) -> void:
 	if _player_ship.has_method("get_ship_velocity"):
@@ -90,3 +106,13 @@ func _on_wave_started(wave: int) -> void:
 
 func _on_wave_ended(wave: int) -> void:
 	_wave_label_timer = 0.0
+
+func _update_mouse_hint() -> void:
+	if not mouse_hint:
+		return
+	var captured = Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED
+	if captured:
+		mouse_hint.text = "Esc = release cursor"
+		mouse_hint.visible = true
+	else:
+		mouse_hint.visible = false

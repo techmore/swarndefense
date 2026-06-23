@@ -10,7 +10,9 @@ extends Node3D
 @export var rotation_period: float = 10.0
 @export var color: Color = Color.WHITE
 
-@export var planet_type: PlanetTextureGenerator.PlanetType = PlanetTextureGenerator.PlanetType.EARTH
+enum PlanetType { MERCURY, VENUS, EARTH, MARS, MOON, GAS_GIANT, ICE_WORLD, LAVA_WORLD }
+
+@export var planet_type: int = PlanetType.EARTH
 @export var texture_seed: int = 0
 @export var noise_frequency: float = 3.0
 @export var show_orbit_trail: bool = true
@@ -65,7 +67,8 @@ func _setup_mesh() -> void:
 				return _finalize_mesh(sphere, material)
 
 	if texture_seed != 0:
-		var texture = PlanetTextureGenerator.generate_texture(planet_type, texture_seed, noise_frequency)
+		var PTG = load("res://scripts/systems/planet_texture_generator.gd")
+		var texture = PTG.generate_texture(planet_type, texture_seed, noise_frequency)
 		material.albedo_texture = texture
 		material.albedo_color = Color.WHITE
 	else:
@@ -125,7 +128,8 @@ func _setup_clouds() -> void:
 func _setup_atmosphere() -> void:
 	if not has_atmosphere:
 		return
-	var atmo_color = PlanetTextureGenerator.get_atmosphere_color(planet_type)
+	var PTG = load("res://scripts/systems/planet_texture_generator.gd")
+	var atmo_color = PTG.get_atmosphere_color(planet_type)
 	if atmo_color.a <= 0.0:
 		return
 

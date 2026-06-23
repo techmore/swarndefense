@@ -1,113 +1,30 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://scripts/ships/player_ship.gd" id="1"]
 
-[sub_resource type="BoxMesh" id="1"]
+[sub_resource type="BoxMesh" id="BoxMesh_1"]
 size = Vector3(1.0, 0.35, 2.8)
-
-[sub_resource type="StandardMaterial3D" id="3"]
-albedo_color = Color(0.15, 0.18, 0.25, 1)
-metallic = 0.7
-roughness = 0.3
-
-[sub_resource type="StandardMaterial3D" id="4"]
-albedo_color = Color(0.02, 0.45, 0.8, 1)
-metallic = 0.3
-roughness = 0.2
-emission_enabled = true
-emission = Color(0.02, 0.4, 0.9, 1)
-emission_energy_multiplier = 1.5
-
-[sub_resource type="CylinderMesh" id="5"]
-radius = 0.15
-height = 0.3
-
-[sub_resource type="SphereMesh" id="6"]
-radius = 0.2
-height = 0.4
-
-[sub_resource type="StandardMaterial3D" id="7"]
-albedo_color = Color(0.0, 0.0, 0.0, 1)
-
-[sub_resource type="StandardMaterial3D" id="8"]
-albedo_color = Color(0.1, 0.6, 1.0, 0.4)
-emission_enabled = true
-emission = Color(0.1, 0.6, 1.0, 1)
-emission_energy_multiplier = 3.0
-transparency = 1
-shading_mode = 2
-cull_mode = 2
 
 [node name="PlayerShip" type="CharacterBody3D"]
 script = ExtResource("1")
 collision_mask = 0
 
-[node name="Fuselage" type="MeshInstance3D" parent="."]
-mesh = SubResource("1")
-material_override = SubResource("3")
-
-[node name="Nose" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, 0.0, -1.6)
-mesh = SubResource("6")
-material_override = SubResource("3")
-scale = Vector3(1, 1, 1.2)
-
-[node name="WingLeft" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, 0.0, 0.3)
-mesh = SubResource("1")
-material_override = SubResource("3")
-scale = Vector3(1.5, 1, 0.3)
-
-[node name="WingRight" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, 0.0, 0.3)
-mesh = SubResource("1")
-material_override = SubResource("3")
-scale = Vector3(1.5, 1, 0.3)
-
-[node name="EngineLeft" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.35, -0.1, 1.5)
-mesh = SubResource("5")
-material_override = SubResource("7")
-
-[node name="EngineRight" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, -0.1, 1.5)
-mesh = SubResource("5")
-material_override = SubResource("7")
-
-[node name="EngineAccentLeft" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.35, -0.1, 1.65)
-mesh = SubResource("1")
-material_override = SubResource("4")
-scale = Vector3(0.15, 1, 1)
-
-[node name="EngineAccentRight" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, -0.1, 1.65)
-mesh = SubResource("1")
-material_override = SubResource("4")
-scale = Vector3(0.15, 1, 1)
-
-[node name="Cockpit" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, 0.3, -0.5)
-mesh = SubResource("6")
-material_override = SubResource("4")
-scale = Vector3(0.8, 0.6, 0.6)
-
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-shape = SubResource("1")
+shape = SubResource("BoxMesh_1")
 
 [node name="MiningRay" type="RayCast3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, 0.2, -0.3)
 enabled = true
 hit_from_inside = true
 collision_mask = 1
 
 [node name="MiningBeam" type="MeshInstance3D" parent="."]
 visible = false
-mesh = SubResource("1")
-material_override = SubResource("8")
+mesh = SubResource("BoxMesh_1")
 scale = Vector3(0.06, 0.06, 1.0)
 
 [node name="ThrusterMain" type="GPUParticles3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, 0.0, 1.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, -0.3, 0.8)
 amount = 50
 lifetime = 0.4
 preprocess = 0.5
@@ -118,7 +35,7 @@ local_coords = true
 draw_order = 1
 
 [node name="ThrusterLeft" type="GPUParticles3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.35, 0.0, 1.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.6, -0.2, 0.5)
 amount = 15
 lifetime = 0.25
 preprocess = 0.3
@@ -128,7 +45,7 @@ randomness = 0.4
 local_coords = true
 
 [node name="ThrusterRight" type="GPUParticles3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, 0.0, 1.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.6, -0.2, 0.5)
 amount = 15
 lifetime = 0.25
 preprocess = 0.3
@@ -137,8 +54,16 @@ explosiveness = 0.3
 randomness = 0.4
 local_coords = true
 
+[node name="EngineAccentLeft" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.35, -0.1, 1.65)
+scale = Vector3(0.15, 1, 1)
+
+[node name="EngineAccentRight" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, -0.1, 1.65)
+scale = Vector3(0.15, 1, 1)
+
 [node name="Headlight" type="OmniLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, 0.2, -1.8)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, 0.3, -1.0)
 light_energy = 0.3
 omni_range = 50.0
 

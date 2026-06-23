@@ -23,11 +23,13 @@ var _cargo: Dictionary = {"metal": 0, "crystal": 0}
 var _mining_active: bool = false
 var _mining_hit: Vector3 = Vector3.ZERO
 var _build_mode: bool = false
-var _build_menu: BuildMenu = null
+var _build_menu = null
 var _building_manager = null
+var _intro_locked: bool = false
 
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var spring_arm: SpringArm3D = $CameraPivot/SpringArm3D
+var _ship_mesh: Node3D = null
 @onready var thruster_main: GPUParticles3D = $ThrusterMain
 @onready var thruster_left: GPUParticles3D = $ThrusterLeft
 @onready var thruster_right: GPUParticles3D = $ThrusterRight
@@ -43,7 +45,8 @@ func _ready() -> void:
 	mining_beam.visible = false
 	mining_ray.collide_with_areas = true
 	_building_manager = get_tree().current_scene.find_child("Buildings", true, false)
-	_build_menu = get_tree().current_scene.find_child("BuildMenu", true, false) as BuildMenu
+	_build_menu = get_tree().current_scene.find_child("BuildMenu", true, false)
+	_load_ship_model()
 	if _build_menu:
 		_build_menu.building_selected.connect(_on_building_selected)
 		_build_menu.menu_closed.connect(_on_build_menu_closed)
@@ -78,6 +81,8 @@ func _make_flame_gradient() -> Gradient:
 	return g
 
 func _input(event: InputEvent) -> void:
+	if _intro_locked:
+		return
 	if _build_menu and _build_menu.menu_active:
 		return
 
@@ -102,7 +107,7 @@ func _input(event: InputEvent) -> void:
 		if not _mouse_captured:
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 			_mouse_captured = true
-	if event.is_action_pressed("pause"):
+	if event.is_action_pressed("pause") or (event is InputEventKey and event.keycode == KEY_ESCAPE and event.pressed):
 		if _mouse_captured:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 			_mouse_captured = false
@@ -145,6 +150,8 @@ func _physics_process(delta: float) -> void:
 		_update_ghost_preview()
 
 func _handle_input(delta: float) -> void:
+	if _intro_locked:
+		return
 	var input = InputHandler.get_movement_vector()
 	var boost = Input.is_action_pressed("boost")
 
@@ -236,9 +243,8 @@ func _update_mining(delta: float) -> void:
 	_mining_hit = hit
 	_update_beam_visual(hit)
 
-	var field = collider as AsteroidField
-	if field:
-		var collected = field.mine_asteroid(hit, mining_rate)
+	if collider and collider.has_method("mine_asteroid"):
+		var collected = collider.mine_asteroid(hit, mining_rate)
 		if collected:
 			_add_to_cargo(collected)
 
@@ -316,6 +322,23 @@ func _update_ghost_preview() -> void:
 	var ray_origin = camera.project_ray_origin(screen_center)
 	var ray_dir = camera.project_ray_normal(screen_center)
 	_building_manager.update_ghost(ray_origin, ray_dir)
+
+func _load_ship_model() -> void:
+	var scene = load("res://assets/quaternius/ships/Challenger.gltf") as PackedScene
+	if not scene:
+		return
+	var instance = scene.instantiate() as Node3D
+	if instance:
+		instance.name = "ChallengerMesh"
+		instance.scale = Vector3.ONE * 0.3
+		add_child(instance)
+		_ship_mesh = instance
+
+func set_intro_locked(locked: bool) -> void:
+	_intro_locked = locked
+
+func apply_launch_impulse() -> void:
+	_velocity = Vector3(0, 10.0, -15.0)
 
 func get_ship_velocity() -> Vector3:
 	return _velocity

@@ -29,6 +29,15 @@ func destroy() -> void:
 func get_health_percent() -> float:
 	return clamp(health / max_health, 0.0, 1.0)
 
+func load_gltf_mesh(path: String, scale: Vector3 = Vector3.ONE) -> Node3D:
+	var scene = load(path) as PackedScene
+	if not scene:
+		return null
+	var instance = scene.instantiate() as Node3D
+	if instance:
+		instance.scale = scale
+	return instance as Node3D
+
 func get_snap_position(global_hit: Vector3) -> Vector3:
 	return global_position
 
