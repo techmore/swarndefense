@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://dhr0o0d06kxj3"]
+[gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://scripts/systems/extractor.gd" id="1_6un3q"]
+[ext_resource type="Script" path="res://scripts/systems/extractor.gd" id="1"]
 
 [node name="Extractor" type="Node3D"]
-script = Extractor
+script = ExtResource("1")
