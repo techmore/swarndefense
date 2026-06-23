@@ -7,8 +7,14 @@ func _ready() -> void:
 	GameManager.change_phase(GameManager.GamePhase.PLAYING)
 	_setup_starfield()
 	_setup_celestial_bodies()
+	_setup_asteroid_field()
 	_spawn_player()
 	_setup_hud()
+
+func _setup_asteroid_field() -> void:
+	var field = AsteroidField.new()
+	field.name = "AsteroidField"
+	celestial_system.add_child(field)
 
 func _setup_hud() -> void:
 	var hud = preload("res://scenes/ui/ship_hud.tscn").instantiate()

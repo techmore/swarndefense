@@ -1,12 +1,9 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/ships/player_ship.gd" id="1"]
 
 [sub_resource type="BoxMesh" id="1"]
 size = Vector3(1.0, 0.35, 2.8)
-
-[sub_resource type="BoxMesh" id="2"]
-size = Vector3(0.15, 0.06, 0.5)
 
 [sub_resource type="StandardMaterial3D" id="3"]
 albedo_color = Color(0.15, 0.18, 0.25, 1)
@@ -31,6 +28,15 @@ height = 0.4
 
 [sub_resource type="StandardMaterial3D" id="7"]
 albedo_color = Color(0.0, 0.0, 0.0, 1)
+
+[sub_resource type="StandardMaterial3D" id="8"]
+albedo_color = Color(0.1, 0.6, 1.0, 0.4)
+emission_enabled = true
+emission = Color(0.1, 0.6, 1.0, 1)
+emission_energy_multiplier = 3.0
+transparency = 1
+shading_mode = 2
+cull_mode = 2
 
 [node name="PlayerShip" type="CharacterBody3D"]
 script = ExtResource("1")
@@ -70,13 +76,15 @@ material_override = SubResource("7")
 
 [node name="EngineAccentLeft" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.35, -0.1, 1.65)
-mesh = SubResource("2")
+mesh = SubResource("1")
 material_override = SubResource("4")
+scale = Vector3(0.15, 1, 1)
 
 [node name="EngineAccentRight" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, -0.1, 1.65)
-mesh = SubResource("2")
+mesh = SubResource("1")
 material_override = SubResource("4")
+scale = Vector3(0.15, 1, 1)
 
 [node name="Cockpit" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, 0.3, -0.5)
@@ -86,6 +94,17 @@ scale = Vector3(0.8, 0.6, 0.6)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("1")
+
+[node name="MiningRay" type="RayCast3D" parent="."]
+enabled = true
+hit_from_inside = true
+collision_mask = 1
+
+[node name="MiningBeam" type="MeshInstance3D" parent="."]
+visible = false
+mesh = SubResource("1")
+material_override = SubResource("8")
+scale = Vector3(0.06, 0.06, 1.0)
 
 [node name="ThrusterMain" type="GPUParticles3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0, 0.0, 1.8)

@@ -2,13 +2,15 @@ extends CharacterBody3D
 
 @export var thrust_force: float = 60.0
 @export var boost_multiplier: float = 3.0
-@export var rotation_speed: float = 3.0
 @export var max_speed: float = 150.0
 @export var max_boost_speed: float = 350.0
 @export var boost_drain: float = 12.0
 @export var boost_regen: float = 6.0
 @export var linear_drag: float = 0.4
 @export var angular_drag: float = 4.0
+@export var mining_range: float = 80.0
+@export var mining_rate: int = 5
+@export var cargo_capacity: int = 500
 
 var _velocity: Vector3 = Vector3.ZERO
 var _angular_velocity: Vector3 = Vector3.ZERO
@@ -17,6 +19,9 @@ var _is_boosting: bool = false
 var _mouse_captured: bool = false
 var _throttle: float = 0.0
 var _lateral_intensity: float = 0.0
+var _cargo: Dictionary = {"metal": 0, "crystal": 0}
+var _mining_active: bool = false
+var _mining_hit: Vector3 = Vector3.ZERO
 
 @onready var camera_pivot: Node3D = $CameraPivot
 @onready var spring_arm: SpringArm3D = $CameraPivot/SpringArm3D
@@ -26,10 +31,13 @@ var _lateral_intensity: float = 0.0
 @onready var headlight: OmniLight3D = $Headlight
 @onready var engine_accent_l: MeshInstance3D = $EngineAccentLeft
 @onready var engine_accent_r: MeshInstance3D = $EngineAccentRight
+@onready var mining_ray: RayCast3D = $MiningRay
+@onready var mining_beam: MeshInstance3D = $MiningBeam
 
 func _ready() -> void:
 	add_to_group("player_ship")
 	_setup_thrusters()
+	mining_beam.visible = false
 
 func _setup_thrusters() -> void:
 	for t in [thruster_main, thruster_left, thruster_right]:
@@ -69,10 +77,13 @@ func _input(event: InputEvent) -> void:
 		if _mouse_captured:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
 			_mouse_captured = false
+	if event.is_action_pressed("interact"):
+		_deposit_cargo()
 
 func _physics_process(delta: float) -> void:
 	_handle_input(delta)
 	_apply_movement(delta)
+	_update_mining(delta)
 	_update_thrusters(delta)
 	_update_camera(delta)
 
@@ -81,7 +92,6 @@ func _handle_input(delta: float) -> void:
 	var boost = Input.is_action_pressed("boost")
 
 	_is_boosting = boost and _boost > 0.0
-
 	_throttle = -input.z
 	_lateral_intensity = Vector2(input.x, input.y).length()
 
@@ -118,6 +128,71 @@ func _apply_movement(delta: float) -> void:
 	else:
 		_boost = min(_boost + boost_regen * delta, 100.0)
 
+func _update_mining(delta: float) -> void:
+	var firing = Input.is_action_pressed("primary_fire")
+
+	if not firing or not _mouse_captured:
+		mining_beam.visible = false
+		_mining_active = false
+		return
+
+	mining_ray.target_position = Vector3(0, 0, -mining_range)
+	mining_ray.force_raycast_update()
+
+	if not mining_ray.is_colliding():
+		mining_beam.visible = false
+		_mining_active = false
+		return
+
+	var hit = mining_ray.get_collision_point()
+	var collider = mining_ray.get_collider()
+
+	if not collider or collider.name != "AsteroidField":
+		mining_beam.visible = false
+		_mining_active = false
+		return
+
+	_mining_active = true
+	_mining_hit = hit
+	_update_beam_visual(hit)
+
+	var field = collider as AsteroidField
+	if field:
+		var collected = field.mine_asteroid(hit, mining_rate)
+		if collected:
+			_add_to_cargo(collected)
+
+func _update_beam_visual(hit: Vector3) -> void:
+	var local_hit = global_transform.basis.inverse() * (hit - global_position)
+	var mid = local_hit * 0.5
+	var dist = local_hit.length()
+
+	mining_beam.position = Vector3(0, 0, -dist * 0.5)
+	mining_beam.scale = Vector3(1, 1, dist)
+	mining_beam.look_at(local_hit, Vector3.UP)
+	mining_beam.visible = true
+
+func _add_to_cargo(collected: Dictionary) -> void:
+	var total = 0
+	for v in _cargo.values():
+		total += v
+	for rtype in collected:
+		var space = cargo_capacity - total
+		if space <= 0:
+			break
+		var add = mini(collected[rtype], space)
+		_cargo[rtype] = _cargo.get(rtype, 0) + add
+		total += add
+
+func _deposit_cargo() -> void:
+	var deposited = 0
+	for rtype in _cargo:
+		var amount = _cargo[rtype]
+		if amount > 0:
+			var added = EconomyManager.add_resource(rtype, amount, "ship_deposit")
+			_cargo[rtype] -= added
+			deposited += added
+
 func _update_thrusters(delta: float) -> void:
 	var main_intensity = clamp(abs(_throttle) + (0.2 if _is_boosting else 0.0), 0.0, 1.0)
 	thruster_main.amount = int(50 * main_intensity)
@@ -151,11 +226,6 @@ func _update_camera(delta: float) -> void:
 		return
 	spring_arm.spring_length = lerp(spring_arm.spring_length, 12.0 if not _is_boosting else 18.0, delta * 2.0)
 
-func _integrate_mouse_motion(event: InputEventMouseMotion) -> void:
-	if _mouse_captured:
-		_angular_velocity.y -= event.relative.x * 0.002
-		_angular_velocity.x -= event.relative.y * 0.002
-
 func get_ship_velocity() -> Vector3:
 	return _velocity
 
@@ -164,3 +234,15 @@ func get_boost() -> float:
 
 func get_is_boosting() -> bool:
 	return _is_boosting
+
+func get_cargo() -> Dictionary:
+	return _cargo.duplicate()
+
+func get_cargo_total() -> int:
+	var t = 0
+	for v in _cargo.values():
+		t += v
+	return t
+
+func is_mining() -> bool:
+	return _mining_active
