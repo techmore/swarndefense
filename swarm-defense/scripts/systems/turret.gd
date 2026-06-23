@@ -18,9 +18,10 @@ func _ready() -> void:
 
 var targeting_range: float = 80.0
 var damage: float = 15.0
+var fire_rate: float = 0.5
 var _cooldown: float = 0.0
 var _barrel: MeshInstance3D
-var _fire_point: Vector3
+var _target: Node3D = null
 
 func build_mesh() -> void:
 	var base_mat = StandardMaterial3D.new()
@@ -73,8 +74,6 @@ func build_mesh() -> void:
 	_barrel.position = Vector3(0, 1.5, 1.0)
 	add_child(_barrel)
 
-	_fire_point = _barrel.position + Vector3(0, 0, 1.2)
-
 func add_collision() -> void:
 	var coll = CollisionShape3D.new()
 	var shape = CylinderShape3D.new()
@@ -84,4 +83,42 @@ func add_collision() -> void:
 	add_child(coll)
 
 func get_fire_point() -> Vector3:
-	return global_transform * _fire_point
+	return _barrel.global_position + _barrel.global_transform.basis.z * -1.8
+
+func _process(delta: float) -> void:
+	if not is_placed:
+		return
+	_cooldown = max(_cooldown - delta, 0.0)
+	_find_target()
+	if _target:
+		_aim_at(_target)
+		if _cooldown <= 0.0:
+			_fire()
+
+func _find_target() -> void:
+	if _target and is_instance_valid(_target):
+		if global_position.distance_to(_target.global_position) <= targeting_range:
+			return
+	_target = null
+	var nearest_dist = targeting_range
+	var swarm = get_tree().get_nodes_in_group("swarm")
+	for s in swarm:
+		var d = global_position.distance_to(s.global_position)
+		if d < nearest_dist:
+			nearest_dist = d
+			_target = s
+
+func _aim_at(target: Node3D) -> void:
+	var dir = (target.global_position - _barrel.global_position).normalized()
+	_barrel.look_at(_barrel.global_position + dir, Vector3.UP)
+
+func _fire() -> void:
+	if not _target or not is_instance_valid(_target):
+		return
+	_cooldown = 1.0 / fire_rate
+	var proj = Projectile.new()
+	var fire_dir = (_target.global_position - _barrel.global_position).normalized()
+	proj.setup(get_fire_point(), fire_dir, "buildings")
+	proj.damage = damage
+	proj.speed = 80.0
+	get_tree().current_scene.add_child(proj)

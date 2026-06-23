@@ -18,6 +18,7 @@ func _ready() -> void:
 		{"name": "Solar Panel", "scene": "res://scenes/buildings/solar_panel.tscn", "costs": {"metal": 75, "crystal": 50}, "icon": null},
 		{"name": "Battery", "scene": "res://scenes/buildings/battery.tscn", "costs": {"metal": 50, "crystal": 75}, "icon": null},
 		{"name": "Turret", "scene": "res://scenes/buildings/turret.tscn", "costs": {"metal": 200, "crystal": 100}, "icon": null},
+		{"name": "V1 Station", "scene": "res://scenes/buildings/v1_station.tscn", "costs": {"metal": 500, "crystal": 200}, "icon": null},
 	]
 
 func show_menu() -> void:

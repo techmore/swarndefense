@@ -170,9 +170,25 @@ func _setup_celestial_bodies() -> void:
 
 func _spawn_player() -> void:
 	var ship = preload("res://scenes/ships/player_ship.tscn").instantiate()
-	ship.global_position = Vector3(415, 0, 0)
+	ship.global_position = Vector3(412, 0, 0)
 	$PlayerShips.add_child(ship)
 	if camera_manager and camera_manager.has_method("follow_target"):
 		camera_manager.follow_target(ship.global_position)
-		camera_manager.zoom_distance = 160.0
+		camera_manager.zoom_distance = 70.0
 		camera_manager._update_zoom_level()
+	_spawn_swarm_patrol()
+
+func _spawn_swarm_patrol() -> void:
+	var count = 4 + randi() % 3
+	for i in range(count):
+		var s = SwarmUnit.new()
+		var angle = randf() * TAU
+		var dist = 100.0 + randf() * 80.0
+		s.global_position = Vector3(380 + cos(angle) * dist, (randf() - 0.5) * 30.0, sin(angle) * dist)
+		s.speed = 8.0 + randf() * 6.0
+		add_child(s)
+		WaveManager.on_enemy_spawned()
+		s.killed.connect(_on_swarm_killed)
+
+func _on_swarm_killed(_unit: Node) -> void:
+	WaveManager.on_enemy_killed()

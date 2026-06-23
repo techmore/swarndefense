@@ -41,6 +41,7 @@ func _ready() -> void:
 	add_to_group("player_ship")
 	_setup_thrusters()
 	mining_beam.visible = false
+	mining_ray.collide_with_areas = true
 	_building_manager = get_tree().current_scene.find_child("Buildings", true, false)
 	_build_menu = get_tree().current_scene.find_child("BuildMenu", true, false) as BuildMenu
 	if _build_menu:
@@ -211,7 +212,22 @@ func _update_mining(delta: float) -> void:
 	var hit = mining_ray.get_collision_point()
 	var collider = mining_ray.get_collider()
 
-	if not collider or collider.name != "AsteroidField":
+	if not collider:
+		mining_beam.visible = false
+		_mining_active = false
+		return
+
+	var swarm = collider as SwarmUnit
+	if not swarm and collider.get_parent():
+		swarm = collider.get_parent() as SwarmUnit
+	if swarm:
+		swarm.take_damage(15.0 * delta * 10.0, self)
+		_mining_active = true
+		_mining_hit = hit
+		_update_beam_visual(hit)
+		return
+
+	if collider.name != "AsteroidField":
 		mining_beam.visible = false
 		_mining_active = false
 		return

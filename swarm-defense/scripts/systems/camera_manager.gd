@@ -6,7 +6,7 @@ var current_zoom: ZoomLevel = ZoomLevel.SYSTEM
 var target_position: Vector3 = Vector3.ZERO
 var zoom_distance: float = 1000.0
 var _rotation_h: float = 0.0
-var _rotation_v: float = -0.3
+var _rotation_v: float = -1.0
 
 @export var system_distance: float = 1500.0
 @export var planetary_distance: float = 100.0
