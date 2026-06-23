@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Swarm Defense — Development Roadmap</title>
+<style>
+:root {
+  --bg: #0a0a12;
+  --card: #12121e;
+  --border: #1e1e32;
+  --accent: #2a6aff;
+  --accent-glow: #1a3acc;
+  --text: #c8c8e0;
+  --text-dim: #606080;
+  --green: #20cc60;
+  --yellow: #ccaa20;
+  --red: #cc3040;
+  --phase-colors: #2a6aff, #6a3aff, #aa3acc, #cc3a6a, #cc6a3a, #aacc3a, #3acc6a, #3a99cc, #6a44aa, #cc4466;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, monospace;
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #4a8aff, #aa4aff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.3rem;
+}
+.subtitle {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  margin-bottom: 2rem;
+}
+.summary-bar {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+  padding: 1rem 1.5rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.summary-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.summary-stat .num {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+.summary-stat .label {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.progress-global {
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.progress-global .bar {
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+.progress-global .bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--green));
+  border-radius: 3px;
+  transition: width 0.5s;
+}
+.phase {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+.phase.completed { border-color: var(--green); }
+.phase.active { border-color: var(--accent); }
+.phase-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 1.2rem;
+  cursor: pointer;
+  user-select: none;
+}
+.phase-header:hover { background: rgba(255,255,255,0.02); }
+.phase-num {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: rgba(42,106,255,0.15);
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  min-width: 2rem;
+  text-align: center;
+}
+.phase.completed .phase-num { background: rgba(32,204,96,0.15); color: var(--green); }
+.phase-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.phase-progress {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  min-width: 3rem;
+  text-align: right;
+}
+.phase-bar {
+  width: 80px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.phase-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s;
+}
+.phase-toggle { color: var(--text-dim); font-size: 0.8rem; }
+.phase-body {
+  padding: 0 1.2rem 1rem;
+  display: none;
+}
+.phase.open .phase-body { display: block; }
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.35rem 0;
+  font-size: 0.85rem;
+}
+.step-check {
+  margin-top: 0.15rem;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--green);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.step-label { flex: 1; }
+.step-done .step-label { text-decoration: line-through; color: var(--text-dim); }
+.step-desc {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  display: block;
+}
+.milestone {
+  color: var(--green);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.5rem 0 0.3rem;
+}
+@media (max-width: 600px) {
+  body { padding: 1rem; }
+  .phase-bar { width: 50px; }
+}
+</style>
+</head>
+<body>
+
+<h1>⬡ SWARM DEFENSE</h1>
+<div class="subtitle">Development Roadmap — Godot 4.7 — Last updated 2026-06-23</div>
+
+<div class="summary-bar" id="summary">
+  <div class="summary-stat"><span class="num" id="total-steps">0</span><span class="label">Steps</span></div>
+  <div class="summary-stat"><span class="num" id="done-steps">0</span><span class="label">Done</span></div>
+  <div class="summary-stat"><span class="num" id="pct-display">0%</span><span class="label">Complete</span></div>
+  <div class="progress-global">
+    <span style="font-size:0.75rem;color:var(--text-dim)">Overall Progress</span>
+    <div class="bar"><div class="bar-fill" id="global-bar" style="width:0%"></div></div>
+  </div>
+</div>
+
+<div id="phases"></div>
+
+<script>
+const PHASES = [
+  {
+    num: 0, title: "Scaffold & Tooling", week: "Week 1",
+    color: "#2a6aff",
+    steps: [
+      { label: "Init project, renderer (Forward+), 3D template", done: true },
+      { label: "Create folder structure, .gitignore", done: true },
+      { label: "Set up autoload stubs (8 singletons)", done: true },
+      { label: "Define Input Map actions (14 actions)", done: true },
+      { label: "Create MainMenu.tscn → World.tscn flow", done: true },
+      { label: "Write DebugConsole autoload", done: true },
+      { label: "Create CameraManager — orbital camera, zoom levels", done: true },
+      { label: "Main scene tree with container nodes", done: true },
+    ],
+    milestone: "Scene transitions work, camera moves, input responsive"
+  },
+  {
+    num: 1, title: "Solar System Simulation", week: "Weeks 2–3",
+    color: "#4a3aff",
+    steps: [
+      { label: "CelestialBody.gd with orbital params", done: true },
+      { label: "Simplified Keplerian orbit: parametric ellipse", done: true },
+      { label: "Scale: 1 AU = 1000 units, sizes exaggerated", done: true },
+      { label: "Sun: OmniLight3D + GPUParticles3D corona + Area3D", done: true },
+      { label: "Planet surfaces: SphereMesh + noise textures", done: true },
+      { label: "Orbit trail lines (SurfaceTool line strip)", done: true },
+      { label: "CameraManager zoom levels (system/planetary/surface)", done: true },
+      { label: "TimeManager: simulation_speed control", done: true },
+      { label: "Procedural planet textures with FastNoiseLite", done: true },
+      { label: "Atmosphere glow sphere (transparent unlit)", done: true },
+      { label: "Starfield background (MultiMeshInstance3D)", done: true },
+      { label: "NASA texture downloader tool", done: true },
+      { label: "Cloud layer for Earth and Venus", done: true },
+    ],
+    milestone: "Sun + 4 planets orbit, camera zooms, textures, atmosphere"
+  },
+  {
+    num: 2, title: "Player Ship & Controls", week: "Weeks 3–4",
+    color: "#7a3acc",
+    steps: [
+      { label: "PlayerShip.gd — CharacterBody3D with 6-DOF movement", done: true },
+      { label: "Newtonian thrust (force-based, low drag)", done: true },
+      { label: "Mouse look + keyboard bindings, mouse capture", done: true },
+      { label: "Camera: 3rd-person SpringArm3D", done: true },
+      { label: "Composite ship mesh (fuselage, wings, cockpit, engines)", done: true },
+      { label: "Boost (limited) + regen", done: true },
+      { label: "Speed HUD: km/s readout, boost bar", done: true },
+      { label: "Thruster particles (main + maneuvering)", done: true },
+      { label: "Engine glow emission animation", done: true },
+      { label: "Ship headlight", done: true },
+      { label: "Angular velocity damping for smooth rotation", done: true },
+    ],
+    milestone: "Player flies through solar system, ship looks good, HUD works"
+  },
+  {
+    num: 3, title: "Resource System & Mining", week: "Weeks 4–6",
+    color: "#aa3acc",
+    steps: [
+      { label: "ResourceType.tres definitions", done: false },
+      { label: "EconomyManager autoload (resources, income, capacity)", done: true },
+      { label: "Procedural asteroid field with MultiMesh", done: true },
+      { label: "Mining beam: RayCast3D + visible laser mesh", done: true },
+      { label: "Per-asteroid resource depletion", done: true },
+      { label: "Ship cargo system (500 cap, metal/crystal)", done: true },
+      { label: "Resource deposit (press F near base)", done: true },
+      { label: "Solar power: distance-based output formula", done: false },
+      { label: "Power as resource: buildings consume power", done: false },
+      { label: "UI: resource bars with income/capacity", done: true },
+    ],
+    milestone: "Mine asteroid, deposit at base, power works"
+  },
+  {
+    num: 4, title: "Building System", week: "Weeks 6–8",
+    color: "#cc3a6a",
+    steps: [
+      { label: "Building.gd base class (costs, power, health, snap)", done: false },
+      { label: "BuildingManager — placement with snap points", done: false },
+      { label: "Placement validation (overlap, terrain angle, cost)", done: false },
+      { label: "Ghost preview — green/red valid/invalid", done: false },
+      { label: "Building types: Extractor, SolarPanel, Battery, Turret", done: false },
+      { label: "Snap-together mechanics", done: false },
+      { label: "Upgrade system", done: false },
+      { label: "Radial build menu UI", done: false },
+    ],
+    milestone: "Place buildings on surfaces, snap works, upgrades functional"
+  },
+  {
+    num: 5, title: "Comms, Relays & Light-Speed Delay", week: "Weeks 8–9",
+    color: "#cc6a3a",
+    steps: [
+      { label: "RelayTower.gd — comms radius, network range", done: false },
+      { label: "NetworkGraph.gd — AStar3D pathfinding along relays", done: false },
+      { label: "Delay formula: distance ÷ speed_of_light", done: false },
+      { label: "DelayedCommand queue with arrival_time", done: false },
+      { label: "UI overlay: network map with latency values", done: false },
+      { label: "Visual pulse along comms connections", done: false },
+    ],
+    milestone: "Relay chains extend range, commands arrive delayed"
+  },
+  {
+    num: 6, title: "Swarm AI & Defense", week: "Weeks 9–12",
+    color: "#aacc3a",
+    steps: [
+      { label: "SwarmUnit.gd base class (CharacterBody3D)", done: false },
+      { label: "Unit types: Scout, Fighter, Tank, Carrier", done: false },
+      { label: "Swarm AI: pathfind to nearest building/relay", done: false },
+      { label: "WaveManager — configs, escalation curve", done: false },
+      { label: "Spawn at solar edge / asteroid field", done: false },
+      { label: "Targeting priority: relays → power → defenses", done: false },
+      { label: "Turret.gd — rotate toward enemy, fire projectile", done: false },
+      { label: "HealthComponent — damage, death, explosion", done: false },
+    ],
+    milestone: "Swarm waves attack, turrets shoot, base can be destroyed"
+  },
+  {
+    num: 7, title: "Multiplayer Core", week: "Weeks 12–16",
+    color: "#3acc6a",
+    steps: [
+      { label: "ENetMultiplayerPeer + SceneMultiplayer setup", done: false },
+      { label: "Lobby UI: host/join, player list, ready toggle", done: false },
+      { label: "Server authority (celestial, waves, economy)", done: false },
+      { label: "Player spawn via RPC for each peer", done: false },
+      { label: "Client prediction + server reconciliation", done: false },
+      { label: "State sync: buildings, resources, health", done: false },
+      { label: "Building placement: client request → server validates", done: false },
+      { label: "Swarm sync: server spawns, clients interpolate", done: false },
+      { label: "Delayed commands with server-side timer", done: false },
+      { label: "Reconnection state resend", done: false },
+    ],
+    milestone: "2+ players fly, build, fight together"
+  },
+  {
+    num: 8, title: "Tech Tree & Progression", week: "Weeks 16–18",
+    color: "#3a99cc",
+    steps: [
+      { label: "Tech.gd resource (name, costs, prerequisites, unlocks)", done: false },
+      { label: "TechManager — branching tree, research queue", done: false },
+      { label: "Tech categories: Mining, Power, Defense, Logistics", done: false },
+      { label: "Unlock signals: building_unlocked, stat_multiplier", done: false },
+      { label: "Tech tree UI screen", done: false },
+      { label: "Progression loop: Mine → Build → Defend → Research", done: false },
+    ],
+    milestone: "Tech tree functional, 10+ techs, progression loop solid"
+  },
+  {
+    num: 9, title: "Demo Polish & Packaging", week: "Weeks 18–20",
+    color: "#6a44aa",
+    steps: [
+      { label: "SFX: mining beam, turret, explosions, UI clicks", done: false },
+      { label: "VFX: particles for explosions, shield hits, trails", done: false },
+      { label: "Music: ambient + combat intensity crossfade", done: false },
+      { label: "Save/Load via ConfigFile or ResourceSaver", done: false },
+      { label: "Main menu polish: settings, credits", done: false },
+      { label: "Graphics quality settings", done: false },
+      { label: "Loading screen with progress bar", done: false },
+      { label: "Minimap: SubViewport / TextureRect", done: false },
+      { label: "Cross-platform export templates", done: false },
+    ],
+    milestone: "Demo-ready build!"
+  },
+  {
+    num: 10, title: "Testing, Balancing & Release", week: "Weeks 20–24",
+    color: "#cc4466",
+    steps: [
+      { label: "Playtest 2–4 players, find bugs", done: false },
+      { label: "Balance resource rates, wave difficulty, tech costs", done: false },
+      { label: "Performance profiling + optimization", done: false },
+      { label: "--server headless dedicated server mode", done: false },
+      { label: "README, itch.io page, gameplay trailer", done: false },
+      { label: "Package demo (itch.io / Steam)", done: false },
+    ],
+    milestone: "Demo release!"
+  }
+];
+
+function render() {
+  const container = document.getElementById('phases');
+  let total = 0, done = 0;
+
+  PHASES.forEach((p, pi) => {
+    let pDone = 0;
+    const stepHtml = p.steps.map((s, si) => {
+      const id = `s${pi}-${si}`;
+      if (s.done) pDone++;
+      return `<div class="step ${s.done ? 'step-done' : ''}">
+        <input class="step-check" type="checkbox" id="${id}" ${s.done ? 'checked' : ''} data-phase="${pi}" data-step="${si}">
+        <label class="step-label" for="${id}">${s.label}</label>
+      </div>`;
+    }).join('');
+
+    total += p.steps.length;
+    done += pDone;
+    const pct = p.steps.length ? Math.round(pDone / p.steps.length * 100) : 0;
+    const isComplete = pct === 100;
+
+    const phaseDiv = document.createElement('div');
+    phaseDiv.className = `phase ${isComplete ? 'completed' : ''}`;
+    phaseDiv.dataset.phase = pi;
+    phaseDiv.innerHTML = `
+      <div class="phase-header" onclick="this.parentElement.classList.toggle('open')">
+        <span class="phase-num">P${p.num}</span>
+        <span class="phase-title">${p.title}</span>
+        <span class="phase-progress">${pDone}/${p.steps.length}</span>
+        <div class="phase-bar"><div class="phase-bar-fill" style="width:${pct}%;background:${p.color}"></div></div>
+        <span class="phase-toggle">▸</span>
+      </div>
+      <div class="phase-body">
+        ${stepHtml}
+        <div class="milestone">✅ ${p.milestone}</div>
+      </div>
+    `;
+    container.appendChild(phaseDiv);
+  });
+
+  updateSummary(total, done);
+  bindCheckboxes();
+}
+
+function bindCheckboxes() {
+  document.querySelectorAll('.step-check').forEach(cb => {
+    cb.addEventListener('change', function() {
+      const phaseIdx = parseInt(this.dataset.phase);
+      const stepIdx = parseInt(this.dataset.step);
+      // persisted via localStorage
+      saveState();
+      recalcPhase(phaseIdx);
+      recalcGlobal();
+    });
+  });
+}
+
+function recalcPhase(pi) {
+  const phase = document.querySelector(`.phase[data-phase="${pi}"]`);
+  if (!phase) return;
+  const checks = phase.querySelectorAll('.step-check');
+  let done = 0;
+  checks.forEach(c => { if (c.checked) done++; });
+  const total = checks.length;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  const isComplete = pct === 100;
+
+  phase.querySelector('.phase-progress').textContent = `${done}/${total}`;
+  phase.querySelector('.phase-bar-fill').style.width = pct + '%';
+  phase.classList.toggle('completed', isComplete);
+}
+
+function recalcGlobal() {
+  const allChecks = document.querySelectorAll('.step-check');
+  let done = 0, total = allChecks.length;
+  allChecks.forEach(c => { if (c.checked) done++; });
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('total-steps').textContent = total;
+  document.getElementById('done-steps').textContent = done;
+  document.getElementById('pct-display').textContent = pct + '%';
+  document.getElementById('global-bar').style.width = pct + '%';
+}
+
+function updateSummary(total, done) {
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('total-steps').textContent = total;
+  document.getElementById('done-steps').textContent = done;
+  document.getElementById('pct-display').textContent = pct + '%';
+  document.getElementById('global-bar').style.width = pct + '%';
+}
+
+function saveState() {
+  const state = {};
+  document.querySelectorAll('.step-check').forEach(cb => {
+    state[cb.id] = cb.checked;
+  });
+  try { localStorage.setItem('swarmdefense_roadmap', JSON.stringify(state)); } catch(e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem('swarmdefense_roadmap');
+    if (!raw) return;
+    const state = JSON.parse(raw);
+    document.querySelectorAll('.step-check').forEach(cb => {
+      if (state[cb.id] !== undefined) cb.checked = state[cb.id];
+    });
+  } catch(e) {}
+}
+
+render();
+loadState();
+recalcGlobal();
+PHASES.forEach((_, i) => recalcPhase(i));
+</script>
+</body>
+</html>
