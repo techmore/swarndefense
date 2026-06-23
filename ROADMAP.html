@@ -185,7 +185,7 @@ h1 {
 <div class="subtitle">Development Roadmap — Godot 4.7 — Last updated 2026-06-23</div>
 
 <div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:1rem 1.5rem;margin-bottom:2rem;font-size:0.85rem;line-height:1.6">
-  <strong style="color:var(--accent)">Game Loop:</strong> You pilot a spacecraft launching from Earth's atmosphere. A Swarm attacks immediately — text popups and objective guides walk you through establishing a forward operating base. Build solar panels for power, turrets for defense, extractors for resources. The camera follows your ship by default (your main character). Your ship has health, shields, ammo, and upgrade slots (hull, shields, weapons, engines). Research new tech to unlock stronger buildings and ship modules. Survive escalating wave defenses with up to 16 players in co-op.
+  <strong style="color:var(--accent)">Game Loop:</strong> You pilot a spacecraft launching from Earth's atmosphere. A Swarm attacks immediately — text popups and objective guides walk you through establishing a forward operating base. Build solar panels for power, turrets for defense, extractors for resources. The camera follows your ship by default (your main character). Your ship has health, shields, ammo, and upgrade slots (hull, shields, weapons, engines). Build orbital comms stations around Earth for early warning coverage (3 stations = fully safe). Unlock FTL travel to the Moon and other planets as your station network grows. Each planet offers rare resources and exploration rewards. Research new tech to unlock stronger buildings and ship modules. Survive escalating wave defenses with up to 16 players in co-op.
 </div>
 
 <div class="summary-bar" id="summary">
@@ -262,8 +262,11 @@ const PHASES = [
       { label: "Ship health system + shield regen", done: false },
       { label: "Ship weapon ammo / energy system", done: false },
       { label: "Ship upgrade slots (hull, shields, weapons, engines)", done: false },
+      { label: "FTL / warp travel system for interplanetary movement", done: false },
+      { label: "Destination selection UI (pick planet/moon from orbit)", done: false },
+      { label: "Warp animation + arrival at destination orbit", done: false },
     ],
-    milestone: "Ship launches from Earth, intro guides player, ship has health/shields/ammo"
+    milestone: "Ship launches from Earth, intro guides player, ship has health/shields/ammo, FTL travel between planets"
   },
   {
     num: 3, title: "Resource System & Mining", week: "Weeks 4–6",
@@ -280,6 +283,8 @@ const PHASES = [
       { label: "Power grid: gen vs consumption, battery buffer", done: true },
       { label: "UI: resource bars with income/capacity", done: true },
       { label: "Swarm enemies drop resources on death", done: true },
+      { label: "Planet-specific rare resources (Moon = helium-3, Mars = minerals, etc.)", done: false },
+      { label: "Exploration rewards: find derelicts, data caches, rare blueprints", done: false },
     ],
     milestone: "Mine asteroid, deposit at base, power grid supports defenses"
   },
@@ -314,6 +319,9 @@ const PHASES = [
       { label: "Visual pulse along comms connections", done: false },
       { label: "Orbital comms stations: 360° coverage around a planet", done: false },
       { label: "3-station safety mechanic: 1 = blind, 2 = gaps, 3 = full coverage", done: false },
+      { label: "Travel unlock: 2 stations anywhere → moon expedition unlocked", done: false },
+      { label: "Moon counts as orbital station slot for its parent planet (Earth+Moon)", done: false },
+      { label: "Each planet: travel requires N stations in its orbital network", done: false },
       { label: "Early warning: stations detect incoming swarms beyond visual range", done: false },
       { label: "Weakened state: planet vulnerable until full coverage established", done: false },
     ],
